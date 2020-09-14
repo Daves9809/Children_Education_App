@@ -30,6 +30,8 @@ import loginandregistration.helper.SessionManager;
 
 
 public class LoginActivity extends AppCompatActivity {
+
+    //definiowanie zmiennych
     private static final String TAG = RegisterActivity.class.getSimpleName();
     private Button btnLogin;
     private Button btnLinkToRegister;
@@ -39,47 +41,49 @@ public class LoginActivity extends AppCompatActivity {
     private SessionManager session;
     private SQLiteHandler db;
 
+    //utworzenie widoku wraz z logiką
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        //przypisywanie zmiennym ich odpowiedników w przestrzeni login.xml
         inputEmail = (EditText) findViewById(R.id.email);
         inputPassword = (EditText) findViewById(R.id.password);
         btnLogin = (Button) findViewById(R.id.btnLogin);
         btnLinkToRegister = (Button) findViewById(R.id.btnLinkToRegisterScreen);
 
-        // Progress dialog
+        // Okno dialogowe pokazujące wskaźnik postępu, nie można go wyłączyć lub ominąć
         pDialog = new ProgressDialog(this);
         pDialog.setCancelable(false);
 
-        // SQLite database handler
+        // Lokalna baza danych SQLite
         db = new SQLiteHandler(getApplicationContext());
 
-        // Session manager
+        // Session manager, pozwala obsługiwać aplikację w zakresie logowania
         session = new SessionManager(getApplicationContext());
 
-        // Check if user is already logged in or not
+        // Sprawdzamy czy użytkownik jest zalogowany
         if (session.isLoggedIn()) {
-            // User is already logged in. Take him to main activity
+            // Użytkownik jest zalogowany, zabierz go do MainActivity
             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
             startActivity(intent);
             finish();
         }
 
-        // Login button Click Event
+        // Wykonuje się w momencie kliknięcia w przycisk btnLogin
         btnLogin.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View view) {
                 String email = inputEmail.getText().toString().trim();
                 String password = inputPassword.getText().toString().trim();
 
-                // Check for empty data in the form
+                // Jesli dane są puste
                 if (!email.isEmpty() && !password.isEmpty()) {
-                    // login user
+                    // logowanie
                     checkLogin(email, password);
                 } else {
-                    // Prompt user to enter credentials
+                    // poproś użytkownika o wypełnienie pustych przestrzeni
                     Toast.makeText(getApplicationContext(),
                             "Please enter the credentials!", Toast.LENGTH_LONG)
                             .show();
@@ -88,7 +92,7 @@ public class LoginActivity extends AppCompatActivity {
 
         });
 
-        // Link to Register Screen
+        // W przypadku kliknięcia w przycisk btnLinkToRegister następuje przeniesienie do RegisterActivity
         btnLinkToRegister.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View view) {
@@ -102,34 +106,35 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     /**
-     * function to verify login details in mysql db
+     Funkcja sprawdzająca poprawność danych w MySql
      * */
     private void checkLogin(final String email, final String password) {
-        // Tag used to cancel the request
+        // Tag używany do anulowania żądania
         String tag_string_req = "req_login";
 
         pDialog.setMessage("Logging in ...");
         showDialog();
 
-        StringRequest strReq = new StringRequest(Method.POST,
-                AppConfig.URL_LOGIN, new Response.Listener<String>() {
+        StringRequest strReq = new StringRequest(Method.POST, // zapytanie do bazy danych pod adresem AppConfig.URL_LOGIN
+                AppConfig.URL_LOGIN, new Response.Listener<String>() { // stworzenie obiektu sluchacza odpowiedzi
 
+            // funkcja odbierająca odpowiedz
             @Override
             public void onResponse(String response) {
-                Log.d(TAG, "Login Response: " + response.toString());
+                Log.d(TAG, "Login Response: " + response.toString()); // Dane dotyczące logowania w Logcat'ie
                 hideDialog();
 
                 try {
                     JSONObject jObj = new JSONObject(response);
                     boolean error = jObj.getBoolean("error");
 
-                    // Check for error node in json
+                    // sprawdz błąd
+                    // jesli nie ma wykona się poniższa funkcja(użytkownik pomyślnie zalogowany)
                     if (!error) {
-                        // user successfully logged in
-                        // Create login session
+                        // Utworzenie sesji Logowania
                         session.setLogin(true);
 
-                        // Now store the user in SQLite
+                        // Utworzenie zmiennych do przechowania danych w SQLite
                         String uid = jObj.getString("uid");
 
                         JSONObject user = jObj.getJSONObject("user");
@@ -138,16 +143,16 @@ public class LoginActivity extends AppCompatActivity {
                         String created_at = user
                                 .getString("created_at");
 
-                        // Inserting row in users table
+                        // Dodanie wierszy do tabeli użytkownika
                         db.addUser(name, email, uid, created_at);
 
-                        // Launch main activity
+                        // Inicjacja MainActivity
                         Intent intent = new Intent(LoginActivity.this,
                                 MainActivity.class);
                         startActivity(intent);
                         finish();
                     } else {
-                        // Error in login. Get the error message
+                        // Błąd w logowaniu. Pobierz błąd
                         String errorMsg = jObj.getString("error_msg");
                         Toast.makeText(getApplicationContext(),
                                 errorMsg, Toast.LENGTH_LONG).show();
@@ -159,7 +164,7 @@ public class LoginActivity extends AppCompatActivity {
                 }
 
             }
-        }, new Response.ErrorListener() {
+        }, new Response.ErrorListener() { // utworzenie instancji obiektu Response.ErrorListener()
 
             @Override
             public void onErrorResponse(VolleyError error) {
@@ -172,7 +177,7 @@ public class LoginActivity extends AppCompatActivity {
 
             @Override
             protected Map<String, String> getParams() {
-                // Posting parameters to login url
+                // Wysyłanie parametrów do adresu url logowania
                 Map<String, String> params = new HashMap<String, String>();
                 params.put("email", email);
                 params.put("password", password);
@@ -182,7 +187,7 @@ public class LoginActivity extends AppCompatActivity {
 
         };
 
-        // Adding request to request queue
+        // Dodanie zapytania do kolejki zapytań
         AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
     }
 

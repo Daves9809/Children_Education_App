@@ -9,7 +9,7 @@ public class SessionManager {
     // LogCat tag
     private static String TAG = SessionManager.class.getSimpleName();
 
-    // Shared Preferences
+    // Shared Preferences pozwala na zapis i odzyskanie danych w formie klucza-wartosci
     SharedPreferences pref;
 
     Editor editor;
@@ -18,8 +18,8 @@ public class SessionManager {
     // Shared pref mode
     int PRIVATE_MODE = 0;
 
-    // Shared preferences file name
-    private static final String PREF_NAME = "AndroidHiveLogin";
+    // Shared preferences nazwa pliku
+    private static final String PREF_NAME = "ChildrenAppLogin";
 
     private static final String KEY_IS_LOGGEDIN = "isLoggedIn";
 
@@ -29,7 +29,8 @@ public class SessionManager {
         editor = pref.edit();
     }
 
-    public void setLogin(boolean isLoggedIn) {
+    public void
+    setLogin(boolean isLoggedIn) {
 
         editor.putBoolean(KEY_IS_LOGGEDIN, isLoggedIn);
 

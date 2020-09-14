@@ -11,17 +11,17 @@ import java.util.HashMap;
 
 public class SQLiteHandler extends SQLiteOpenHelper {
     private static final String TAG = SQLiteHandler.class.getSimpleName();
-    // All Static variables
-    // Database Version
+    // Wszystkie statyczne zmienne
+    // Wersja bazy danych
     private static final int DATABASE_VERSION = 1;
 
-    // Database Name
+    // Nazwa bazy danych
     private static final String DATABASE_NAME = "android_api";
 
-    // Login table name
+    // Nazwa tabeli logowania
     private static final String TABLE_USER = "user";
 
-    // Login Table Columns names
+    // Nazwa kolumn tabeli logowania
     private static final String KEY_ID = "id";
     private static final String KEY_NAME = "name";
     private static final String KEY_EMAIL = "email";
@@ -32,7 +32,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
-    // Creating Tables
+    // Utworzenie tablic
     @Override
     public void onCreate(SQLiteDatabase db) {
         String CREATE_LOGIN_TABLE = "CREATE TABLE " + TABLE_USER + "("
@@ -44,18 +44,18 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         Log.d(TAG, "Database tables created");
     }
 
-    // Upgrading database
+    // Aktualizacja tablic
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        // Drop older table if existed
+        // Usunięcie starych istniejących tablic
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_USER);
 
-        // Create tables again
+        // Ponowne utworzenie aktualnej tabeli
         onCreate(db);
     }
 
     /**
-     * Storing user details in database
+     Zapis danych użytkownika do bazy danych
      * */
     public void addUser(String name, String email, String uid, String created_at) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -66,7 +66,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         values.put(KEY_UID, uid); // Email
         values.put(KEY_CREATED_AT, created_at); // Created At
 
-        // Inserting Row
+        // Dodanie wiersza
         long id = db.insert(TABLE_USER, null, values);
         db.close(); // Closing database connection
 
@@ -74,7 +74,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
     }
 
     /**
-     * Getting user data from database
+     Pobieranie danych użytkownika z bazy danych
      * */
     public HashMap<String, String> getUserDetails() {
         HashMap<String, String> user = new HashMap<String, String>();
@@ -82,7 +82,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
 
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
-        // Move to first row
+        // Przenieśdo pierwszego wiersza
         cursor.moveToFirst();
         if (cursor.getCount() > 0) {
             user.put("name", cursor.getString(1));
@@ -92,14 +92,14 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         }
         cursor.close();
         db.close();
-        // return user
+        // zwrócenie użytkownika
         Log.d(TAG, "Fetching user from Sqlite: " + user.toString());
 
         return user;
     }
 
     /**
-     * Re crate database Delete all tables and create them again
+     Utworzenie ponownie bazy danych Usunięcie wszystkich tabel i utworzenie ich ponownie
      * */
     public void deleteUsers() {
         SQLiteDatabase db = this.getWritableDatabase();

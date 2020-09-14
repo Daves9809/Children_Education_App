@@ -28,6 +28,8 @@ import loginandregistration.helper.SQLiteHandler;
 import loginandregistration.helper.SessionManager;
 
 public class RegisterActivity extends AppCompatActivity {
+
+    //definiowanie zmiennych
     private static final String TAG = RegisterActivity.class.getSimpleName();
     private Button btnRegister;
     private Button btnLinkToLogin;
@@ -38,28 +40,30 @@ public class RegisterActivity extends AppCompatActivity {
     private SessionManager session;
     private SQLiteHandler db;
 
+    //utworzenie widoku wraz z logiką
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
+        //przypisywanie zmiennym ich odpowiedników w przestrzeni activity_register.xml
         inputFullName = (EditText) findViewById(R.id.name);
         inputEmail = (EditText) findViewById(R.id.email);
         inputPassword = (EditText) findViewById(R.id.password);
         btnRegister = (Button) findViewById(R.id.btnRegister);
         btnLinkToLogin = (Button) findViewById(R.id.btnLinkToLoginScreen);
 
-        // Progress dialog
+        // Okno dialogowe pokazujące wskaźnik postępu, nie można go wyłączyć lub ominąć
         pDialog = new ProgressDialog(this);
         pDialog.setCancelable(false);
 
-        // Session manager
+        // Session manager, pozwala obsługiwać aplikację w zakresie logowania
         session = new SessionManager(getApplicationContext());
 
-        // SQLite database handler
+        // Lokalna baza danych SQLite
         db = new SQLiteHandler(getApplicationContext());
 
-        // Check if user is already logged in or not
+        // Sprawdzamy czy użytkownik jest zalogowany
         if (session.isLoggedIn()) {
             // User is already logged in. Take him to main activity
             Intent intent = new Intent(RegisterActivity.this,
@@ -85,7 +89,7 @@ public class RegisterActivity extends AppCompatActivity {
             }
         });
 
-        // Link to Login Screen
+        // Wykonuje się w momencie kliknięcia w przycisk btnLogin
         btnLinkToLogin.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View view) {
@@ -99,12 +103,13 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     /**
-     * Function to store user in MySQL database will post params(tag, name,
-     * email, password) to register url
+     * Funkcja do przechowywani użytkownika w bazie danych MySql będzie wysyłac parametry(tag,nazwa,
+     * email, password) do adresu url rejestracji
      * */
     private void registerUser(final String name, final String email,
                               final String password) {
-        // Tag used to cancel the request
+
+        // Tag używany do anulowania zapytania
         String tag_string_req = "req_register";
 
         pDialog.setMessage("Registering ...");
@@ -122,8 +127,8 @@ public class RegisterActivity extends AppCompatActivity {
                     JSONObject jObj = new JSONObject(response);
                     boolean error = jObj.getBoolean("error");
                     if (!error) {
-                        // User successfully stored in MySQL
-                        // Now store the user in sqlite
+                        // Użytkownik pomyślnie zalogowany
+                        // Teraz zapisz użytkownika w bazie danych SQLite
                         String uid = jObj.getString("uid");
 
                         JSONObject user = jObj.getJSONObject("user");
@@ -132,12 +137,12 @@ public class RegisterActivity extends AppCompatActivity {
                         String created_at = user
                                 .getString("created_at");
 
-                        // Inserting row in users table
+                        // Wstawianie wiersza w tabeli użytkowników
                         db.addUser(name, email, uid, created_at);
 
                         Toast.makeText(getApplicationContext(), "User successfully registered. Try login now!", Toast.LENGTH_LONG).show();
 
-                        // Launch login activity
+                        // Inicjowanie LoginActivity
                         Intent intent = new Intent(
                                 RegisterActivity.this,
                                 LoginActivity.class);
@@ -145,8 +150,7 @@ public class RegisterActivity extends AppCompatActivity {
                         finish();
                     } else {
 
-                        // Error occurred in registration. Get the error
-                        // message
+                        // W rejestracji wystąpił błąd. Wydrukuj wiadomość błędu
                         String errorMsg = jObj.getString("error_msg");
                         Toast.makeText(getApplicationContext(),
                                 errorMsg, Toast.LENGTH_LONG).show();
@@ -169,7 +173,7 @@ public class RegisterActivity extends AppCompatActivity {
 
             @Override
             protected Map<String, String> getParams() {
-                // Posting params to register url
+                // Wysyłanie parametrów do adresu url rejestracji
                 Map<String, String> params = new HashMap<String, String>();
                 params.put("name", name);
                 params.put("email", email);
@@ -180,7 +184,7 @@ public class RegisterActivity extends AppCompatActivity {
 
         };
 
-        // Adding request to request queue
+        // Dodanie zapytania do kolejki zapytań
         AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
     }
 

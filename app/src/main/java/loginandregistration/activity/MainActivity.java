@@ -24,16 +24,18 @@ public class MainActivity extends AppCompatActivity {
     private SQLiteHandler db;
     private SessionManager session;
 
+    //utworzenie widoku wraz z logiką
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //przypisanie zmiennym odpowiednich elementów w przestrzeni activity_main.xml
         txtName = (TextView) findViewById(R.id.name);
         txtEmail = (TextView) findViewById(R.id.email);
         btnLogout = (Button) findViewById(R.id.btnLogout);
 
-        // SqLite database handler
+        // Definiowanie lokalnego programu obsługi bazy danych
         db = new SQLiteHandler(getApplicationContext());
 
         // session manager
@@ -43,17 +45,17 @@ public class MainActivity extends AppCompatActivity {
             logoutUser();
         }
 
-        // Fetching user details from sqlite
+        // pobieranie danych użytkownika z lokalnej bazy danych
         HashMap<String, String> user = db.getUserDetails();
 
         String name = user.get("name");
         String email = user.get("email");
 
-        // Displaying the user details on the screen
+        // Wyświetlenie danych podstawowych danych użytkownika na ekranie
         txtName.setText(name);
         txtEmail.setText(email);
 
-        // Logout button click event
+        // przycisk do wylogowania
         btnLogout.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -64,15 +66,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Logging out the user. Will set isLoggedIn flag to false in shared
-     * preferences Clears the user data from sqlite users table
+     * Wylogowywanie użytkownika. Operacja ta ustawi flagę isLoggedIn na false, a Shared
+     * Preferences wyczysci podreczne dane uzytkownika w sqLiteDatabase
      * */
     private void logoutUser() {
         session.setLogin(false);
 
         db.deleteUsers();
 
-        // Launching the login activity
+        // Zainicjowanie LoginActivity
         Intent intent = new Intent(MainActivity.this, LoginActivity.class);
         startActivity(intent);
         finish();
