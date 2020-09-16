@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.loginandregistration.R;
+import com.stepcounter.StepCounterActivity;
 
 import loginandregistration.helper.SQLiteHandler;
 import loginandregistration.helper.SessionManager;
@@ -20,6 +21,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView txtName;
     private TextView txtEmail;
     private Button btnLogout;
+    private Button btnPlay;
 
     private SQLiteHandler db;
     private SessionManager session;
@@ -32,8 +34,8 @@ public class MainActivity extends AppCompatActivity {
 
         //przypisanie zmiennym odpowiednich elementów w przestrzeni activity_main.xml
         txtName = (TextView) findViewById(R.id.name);
-        txtEmail = (TextView) findViewById(R.id.email);
         btnLogout = (Button) findViewById(R.id.btnLogout);
+        btnPlay = (Button) findViewById(R.id.btnPlay);
 
         // Definiowanie lokalnego programu obsługi bazy danych
         db = new SQLiteHandler(getApplicationContext());
@@ -49,11 +51,9 @@ public class MainActivity extends AppCompatActivity {
         HashMap<String, String> user = db.getUserDetails();
 
         String name = user.get("name");
-        String email = user.get("email");
 
         // Wyświetlenie danych podstawowych danych użytkownika na ekranie
         txtName.setText(name);
-        txtEmail.setText(email);
 
         // przycisk do wylogowania
         btnLogout.setOnClickListener(new View.OnClickListener() {
@@ -61,6 +61,15 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 logoutUser();
+            }
+        });
+
+        btnPlay.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, StepCounterActivity.class);
+                startActivity(intent);
             }
         });
     }

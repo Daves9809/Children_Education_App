@@ -2,10 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.loginandregistration"
     android:versionCode="1"
-    android:versionName="1.0" >
+    android:versionName="1.0">
 
     <uses-permission android:name="android.permission.INTERNET" />
-
 
     <application
         android:name="loginandregistration.app.AppController"
@@ -13,15 +12,15 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:networkSecurityConfig="@xml/network_security_config"
-
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name="com.stepcounter.StepCounterActivity"></activity>
         <activity
             android:name="loginandregistration.activity.LoginActivity"
             android:label="@string/app_name"
             android:launchMode="singleTop"
-            android:windowSoftInputMode="adjustPan" >
+            android:windowSoftInputMode="adjustPan">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -37,6 +36,7 @@
             android:name="loginandregistration.activity.MainActivity"
             android:label="@string/app_name"
             android:launchMode="singleTop" />
+
         <uses-library
             android:name="org.apache.http.legacy"
             android:required="false" />
