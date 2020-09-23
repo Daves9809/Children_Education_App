@@ -47,11 +47,11 @@ public class RegisterActivity extends AppCompatActivity {
         setContentView(R.layout.activity_register);
 
         //przypisywanie zmiennym ich odpowiedników w przestrzeni activity_register.xml
-        inputFullName = (EditText) findViewById(R.id.name);
-        inputEmail = (EditText) findViewById(R.id.email);
-        inputPassword = (EditText) findViewById(R.id.password);
-        btnRegister = (Button) findViewById(R.id.btnRegister);
-        btnLinkToLogin = (Button) findViewById(R.id.btnLinkToLoginScreen);
+        inputFullName =  findViewById(R.id.name);
+        inputEmail =  findViewById(R.id.email);
+        inputPassword =  findViewById(R.id.password);
+        btnRegister =  findViewById(R.id.btnRegister);
+        btnLinkToLogin =  findViewById(R.id.btnLinkToLoginScreen);
 
         // Okno dialogowe pokazujące wskaźnik postępu, nie można go wyłączyć lub ominąć
         pDialog = new ProgressDialog(this);
@@ -120,7 +120,7 @@ public class RegisterActivity extends AppCompatActivity {
 
             @Override
             public void onResponse(String response) {
-                Log.d(TAG, "Register Response: " + response.toString());
+                Log.d(TAG, "Register Response: " + response);
                 hideDialog();
 
                 try {
@@ -134,11 +134,13 @@ public class RegisterActivity extends AppCompatActivity {
                         JSONObject user = jObj.getJSONObject("user");
                         String name = user.getString("name");
                         String email = user.getString("email");
+                        String steps = user.getString("steps");
+                        String points = user.getString("points");
                         String created_at = user
                                 .getString("created_at");
 
                         // Wstawianie wiersza w tabeli użytkowników
-                        db.addUser(name, email, uid, created_at);
+                        db.addUser(name, email, uid, steps, points, created_at);
 
                         Toast.makeText(getApplicationContext(), "User successfully registered. Try login now!", Toast.LENGTH_LONG).show();
 
@@ -174,7 +176,7 @@ public class RegisterActivity extends AppCompatActivity {
             @Override
             protected Map<String, String> getParams() {
                 // Wysyłanie parametrów do adresu url rejestracji
-                Map<String, String> params = new HashMap<String, String>();
+                Map<String, String> params = new HashMap<>();
                 params.put("name", name);
                 params.put("email", email);
                 params.put("password", password);

@@ -18,4 +18,7 @@
     <string name="btn_play">GRAJ</string>
     <string name="btn_ustawienia">ustawienia</string>
     <string name="btn_statystyki">statystyki</string>
+    <string name="steps">STEPS:</string>
+    <string name="reset">Reset</string>
+    <string name="send_data">Send Data</string>
 </resources>

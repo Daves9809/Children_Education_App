@@ -1,9 +1,12 @@
 package loginandregistration.app;
 
 public class AppConfig {
-    // Server user login url
+    // Adres Url pliku php do logowania na serwerze
     public static String URL_LOGIN = "http://dawid.server802166.nazwa.pl/login.php";
 
-    // Server user register url
+    // Adres Url pliku php do rejestrowania na serwerze
     public static String URL_REGISTER = "http://dawid.server802166.nazwa.pl/register.php";
+
+    // Adres Url pliku php do wysylania danych na serwer
+    public static String URL_SEND_DATA = "http://dawid.server802166.nazwa.pl/sendData.php";
 }

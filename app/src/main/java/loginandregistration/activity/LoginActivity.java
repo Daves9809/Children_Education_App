@@ -48,10 +48,10 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
 
         //przypisywanie zmiennym ich odpowiedników w przestrzeni login.xml
-        inputEmail = (EditText) findViewById(R.id.email);
-        inputPassword = (EditText) findViewById(R.id.password);
-        btnLogin = (Button) findViewById(R.id.btnLogin);
-        btnLinkToRegister = (Button) findViewById(R.id.btnLinkToRegisterScreen);
+        inputEmail =  findViewById(R.id.email);
+        inputPassword =  findViewById(R.id.password);
+        btnLogin =  findViewById(R.id.btnLogin);
+        btnLinkToRegister =  findViewById(R.id.btnLinkToRegisterScreen);
 
         // Okno dialogowe pokazujące wskaźnik postępu, nie można go wyłączyć lub ominąć
         pDialog = new ProgressDialog(this);
@@ -106,7 +106,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     /**
-     Funkcja sprawdzająca poprawność danych w MySql
+     Funkcja sprawdzająca poprawność danych w MySql oraz jednoczesnie aktualizaujaca dane w SQLite
      * */
     private void checkLogin(final String email, final String password) {
         // Tag używany do anulowania żądania
@@ -118,10 +118,10 @@ public class LoginActivity extends AppCompatActivity {
         StringRequest strReq = new StringRequest(Method.POST, // zapytanie do bazy danych pod adresem AppConfig.URL_LOGIN
                 AppConfig.URL_LOGIN, new Response.Listener<String>() { // stworzenie obiektu sluchacza odpowiedzi
 
-            // funkcja odbierająca odpowiedz
+            // funkcja odbierająca odpowiedz od plikow php
             @Override
             public void onResponse(String response) {
-                Log.d(TAG, "Login Response: " + response.toString()); // Dane dotyczące logowania w Logcat'ie
+                Log.d(TAG, "Login Response: " + response); // Dane dotyczące logowania w Logcat'ie
                 hideDialog();
 
                 try {
@@ -140,11 +140,13 @@ public class LoginActivity extends AppCompatActivity {
                         JSONObject user = jObj.getJSONObject("user");
                         String name = user.getString("name");
                         String email = user.getString("email");
+                        String steps = user.getString("steps");
+                        String points = user.getString("points");
                         String created_at = user
                                 .getString("created_at");
 
                         // Dodanie wierszy do tabeli użytkownika
-                        db.addUser(name, email, uid, created_at);
+                        db.addUser(name, email, uid, steps, points, created_at);
 
                         // Inicjacja MainActivity
                         Intent intent = new Intent(LoginActivity.this,
@@ -178,7 +180,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             protected Map<String, String> getParams() {
                 // Wysyłanie parametrów do adresu url logowania
-                Map<String, String> params = new HashMap<String, String>();
+                Map<String, String> params = new HashMap<>();
                 params.put("email", email);
                 params.put("password", password);
 
