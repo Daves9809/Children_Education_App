@@ -9,4 +9,7 @@ public class AppConfig {
 
     // Adres Url pliku php do wysylania danych na serwer
     public static String URL_SEND_DATA = "http://dawid.server802166.nazwa.pl/sendData.php";
+
+    // Adres Url pliku php do wysylania danych na serwer
+    public static String URL_GET_STEPS = "http://dawid.server802166.nazwa.pl/getStepsFromMySql.php";
 }

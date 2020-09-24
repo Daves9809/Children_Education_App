@@ -12,10 +12,7 @@ import com.loginandregistration.R;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
@@ -23,12 +20,16 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -52,7 +53,8 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
     private SharedPreferences.Editor editor;
     private SQLiteHandler db;
     private ProgressDialog pDialog;
-    private BroadcastReceiver minuteUpdateReceiver;
+    private Handler mHandler;
+    private int stepsAsInt;
 
 
     @SuppressLint("CommitPrefEdits")
@@ -66,6 +68,7 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
             //ask for permission
             requestPermissions(new String[]{Manifest.permission.ACTIVITY_RECOGNITION}, 1);
         }
+        mHandler = new Handler();
 
         textViewStepCounter =  findViewById(R.id.textViewStepCounter);
         textViewStepDetector =  findViewById(R.id.textViewStepDetector);
@@ -89,7 +92,7 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
         mPreferences = getPreferences(MODE_PRIVATE);
         editor = mPreferences.edit();
 
-//        startMinuteUpdater(email,convertStepsToString());
+
 
         btnButton.setOnClickListener(new View.OnClickListener() {
 
@@ -103,11 +106,19 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
         btnSend.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View view) {
-                updateSteps(email,convertStepsToString());
+                updateStepsIntoMySql(email,convertStepsToString());
             }
 
         });
+        getStepsFromMySql(email); // jednorazowe pobranie liczby krokow z MySql po przejsciu do tej aktywnosci
+        startRepeatingTask(); // funkcja aktualizująca liczbę kroków z bazą danych co minutę
 
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        stopRepeatingTask();
     }
 
     @Override
@@ -146,17 +157,42 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
             savePreferences(today(), todaySteps + additionStep); // zapisujemy dane, key- data dzisiejszego dnia, value - liczba krokow dzisiaj
         }
         //Logcat pomocniczy
-        Log.i("TAG", "TodayStep " + getPreferences(today()));
-        Log.i("TAG", "AdditionStep" + additionStep);
-        Log.i("TAG", "TotalStepCount" + totalStepCountSinceReboot);
     }
+
+
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
+    }
 
+    Runnable mStatusChecker = new Runnable() { //
+        @Override
+        public void run() {
+            // Lokalna baza danych SQLite
+            db = new SQLiteHandler(getApplicationContext());
+            // pobieranie danych użytkownika z lokalnej bazy danych
+            HashMap<String, String> user = db.getUserDetails();
+            final String email = user.get("email");
+            try{
+                    Log.d("TAG","empty try/catch for update");
+            }finally {
+                updateStepsIntoMySql(email,convertStepsToString());
+                // 5 seconds by default, can be changed later
+                int mInterval = 60000; // update co 1 minute
+                mHandler.postDelayed(mStatusChecker, mInterval);
+            }
+        }
+    };
+
+    void startRepeatingTask() {
+        mStatusChecker.run();
+    }
+    void stopRepeatingTask() {
+        mHandler.removeCallbacks(mStatusChecker);
     }
 
     private void savePreferences(String key, int value) {
+        Log.d("TAG","Preferences saved, steps = " + value);
         editor.putInt(key, value);
         editor.commit();
     }
@@ -172,7 +208,7 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
     }
 
     // funkcja do aktualizowania krokow w MySQL
-    private void updateSteps(final String email, final String steps) { // trzeba konwertowac inta steps do stringa
+    private void updateStepsIntoMySql(final String email, final String steps) { // trzeba konwertowac inta steps do stringa
         // Tag używany do anulowania żądania
         String tag_string_req = "req_update";
 
@@ -185,7 +221,7 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
             // funkcja odbierająca odpowiedz
             @Override
             public void onResponse(String response) {
-                Log.d(TAG, "Update Response: " + response); // Dane dotyczące aktualizowania w Logcat'ie
+                Log.d(TAG, "Update Response: " + response + " Steps = " + steps); // Dane dotyczące aktualizowania w Logcat'ie
                 hideDialog();
 
             }
@@ -215,6 +251,66 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
         // Dodanie zapytania do kolejki zapytań
         AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
     }
+    private void getStepsFromMySql(final String email){
+        int stepss =0;
+        // Tag używany do anulowania żądania
+        String tag_string_req = "req_getSteps";
+
+        pDialog.setMessage("Getting data ..");
+        showDialog();
+
+        StringRequest strReq = new StringRequest(Request.Method.POST, // zapytanie do bazy danych pod adresem AppConfig.URL_LOGIN
+                AppConfig.URL_GET_STEPS, new Response.Listener<String>() { // stworzenie obiektu sluchacza odpowiedzi
+
+            // funkcja odbierająca odpowiedz
+            @Override
+            public void onResponse(String response) {
+                Log.d(TAG, "GetSteps Response: " + response); // Dane dotyczące aktualizowania w Logcat'ie
+                hideDialog();
+                try {
+                    JSONObject jObj = new JSONObject(response);
+                    boolean error = jObj.getBoolean("error");
+
+                    // sprawdz błąd
+                    // jesli nie ma wykona się poniższa funkcja(użytkownik pomyślnie zalogowany)
+
+                        JSONObject user = jObj.getJSONObject("user");
+                        String steps = user.getString("steps");
+                        savePreferences(today(),Integer.parseInt(steps));
+
+
+                    } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }, new Response.ErrorListener() { // utworzenie instancji obiektu Response.ErrorListener()
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e(TAG, "GetSteps Error: " + error.getMessage());
+                Toast.makeText(getApplicationContext(),
+                        error.getMessage(), Toast.LENGTH_LONG).show();
+                hideDialog();
+            }
+        }) {
+
+            @Override
+            protected Map<String, String> getParams() {
+                // Wysyłanie parametrów do adresu url logowania
+                Map<String, String> params = new HashMap<>();
+                params.put("email", email);
+
+                return params;
+            }
+
+        };
+
+        // Dodanie zapytania do kolejki zapytań
+        AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
+
+    }
+
 
 
     private void showDialog() {
@@ -230,19 +326,6 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
     private String convertStepsToString(){
         int steps = getPreferences(today());
         return String.valueOf(steps);
-    }
-
-    //funkcja do aktualizacji danych w bazie danych co minute
-    public void startMinuteUpdater(final String email, final String steps){
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(Intent.ACTION_TIME_TICK);
-        minuteUpdateReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                updateSteps(email,steps);
-            }
-        };
-        registerReceiver(minuteUpdateReceiver, intentFilter);
     }
 
 }
