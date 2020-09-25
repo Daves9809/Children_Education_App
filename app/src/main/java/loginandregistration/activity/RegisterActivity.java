@@ -138,9 +138,11 @@ public class RegisterActivity extends AppCompatActivity {
                         String points = user.getString("points");
                         String created_at = user
                                 .getString("created_at");
+                        String updated_at = user
+                                .getString("updated_at");
 
                         // Wstawianie wiersza w tabeli użytkowników
-                        db.addUser(name, email, uid, steps, points, created_at);
+                        db.addUser(name, email, uid, steps, points, created_at,updated_at);
 
                         Toast.makeText(getApplicationContext(), "User successfully registered. Try login now!", Toast.LENGTH_LONG).show();
 

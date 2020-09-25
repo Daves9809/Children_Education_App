@@ -27,6 +27,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
     private static final String KEY_EMAIL = "email";
     private static final String KEY_UID = "uid";
     private static final String KEY_CREATED_AT = "created_at";
+    private static final String KEY_UPDATED_AT = "updated_at";
     private static final String KEY_POINTS = "points";
     private static final String KEY_STEPS = "steps";
 
@@ -42,7 +43,8 @@ public class SQLiteHandler extends SQLiteOpenHelper {
                 + KEY_EMAIL + " TEXT UNIQUE," + KEY_UID + " TEXT,"
                 + KEY_STEPS + " INTEGER,"
                 + KEY_POINTS + " INTEGER,"
-                + KEY_CREATED_AT + " TEXT" + ")";
+                + KEY_CREATED_AT + " TEXT,"
+                + KEY_UPDATED_AT + " TEXT" +")";
         db.execSQL(CREATE_LOGIN_TABLE);
 
         Log.d(TAG, "Database tables created");
@@ -61,7 +63,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
     /**
      Zapis danych użytkownika do bazy danych
      * */
-    public void addUser(String name, String email, String uid,String steps, String points, String created_at) {
+    public void addUser(String name, String email, String uid,String steps, String points, String created_at, String updated_at) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
@@ -71,6 +73,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         values.put(KEY_STEPS, steps); // Steps
         values.put(KEY_POINTS, points); // Points
         values.put(KEY_CREATED_AT, created_at); // Created At
+        values.put(KEY_UPDATED_AT, updated_at); // Created At
 
         // Dodanie wiersza
         long id = db.insert(TABLE_USER, null, values);
@@ -97,6 +100,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
             user.put("steps", cursor.getString(4));
             user.put("points", cursor.getString(5));
             user.put("created_at", cursor.getString(6));
+            user.put("updated_at", cursor.getString(7));
         }
         cursor.close();
         db.close();

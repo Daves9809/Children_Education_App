@@ -144,9 +144,10 @@ public class LoginActivity extends AppCompatActivity {
                         String points = user.getString("points");
                         String created_at = user
                                 .getString("created_at");
-
-                        // Dodanie wierszy do tabeli użytkownika
-                        db.addUser(name, email, uid, steps, points, created_at);
+                        String updated_at = user
+                                .getString("updated_at");
+                        // Wstawianie wiersza w tabeli użytkowników
+                        db.addUser(name, email, uid, steps, points, created_at,updated_at);
 
                         // Inicjacja MainActivity
                         Intent intent = new Intent(LoginActivity.this,

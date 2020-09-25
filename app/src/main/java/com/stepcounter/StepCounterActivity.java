@@ -148,7 +148,7 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
         int todaySteps = getPreferences(today()); // przypisywanie zapisanej zmiennej do codziennych krokow
         milestoneStep = totalStepCountSinceReboot - 1;
 
-        textViewStepCounter.setText(String.valueOf(getPreferences(today())));
+
 
         if (todaySteps == 0) {
             savePreferences(today(), 1); // zapisujemy dane, key- data dzisiejszego dnia, value - liczba krokow dzisiaj
@@ -156,7 +156,7 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
             additionStep = totalStepCountSinceReboot - milestoneStep;
             savePreferences(today(), todaySteps + additionStep); // zapisujemy dane, key- data dzisiejszego dnia, value - liczba krokow dzisiaj
         }
-        //Logcat pomocniczy
+        textViewStepCounter.setText(String.valueOf(getPreferences(today()))); // wyswietlenie wyniku na ekranie
     }
 
 
@@ -241,6 +241,7 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
                 // Wysyłanie parametrów do adresu url logowania
                 Map<String, String> params = new HashMap<>();
                 params.put("steps", steps);
+                params.put("updated_at",today()); // updateowanie daty
                 params.put("email", email);
 
                 return params;
@@ -262,6 +263,7 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
         StringRequest strReq = new StringRequest(Request.Method.POST, // zapytanie do bazy danych pod adresem AppConfig.URL_LOGIN
                 AppConfig.URL_GET_STEPS, new Response.Listener<String>() { // stworzenie obiektu sluchacza odpowiedzi
 
+
             // funkcja odbierająca odpowiedz
             @Override
             public void onResponse(String response) {
@@ -276,7 +278,11 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
 
                         JSONObject user = jObj.getJSONObject("user");
                         String steps = user.getString("steps");
-                        savePreferences(today(),Integer.parseInt(steps));
+                        String updated_at = user.getString("updated_at");
+                        if(updated_at.equals(today()))
+                            savePreferences(today(),Integer.parseInt(steps));
+                        else
+                            savePreferences(today(),0);
 
 
                     } catch (JSONException e) {

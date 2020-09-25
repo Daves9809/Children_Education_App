@@ -18,6 +18,7 @@ $response = array("error" => FALSE);
 		$response["user"]["steps"] = $user["steps"];
 		$response["user"]["name"] = $user["name"];
         $response["user"]["email"] = $user["email"];
+		$response["user"]["updated_at"] = $user["updated_at"];
         echo json_encode($response);
 }else{
 	$response["error"] = TRUE;

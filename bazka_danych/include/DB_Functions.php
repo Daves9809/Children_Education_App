@@ -32,7 +32,7 @@ class DB_Functions {
         $encrypted_password = $hash["encrypted"]; // encrypted password
         $salt = $hash["salt"]; // salt
 
-        $stmt = $this->conn->prepare("INSERT INTO users(unique_id, name, email, encrypted_password, salt, created_at) VALUES(?, ?, ?, ?, ?, NOW())");
+        $stmt = $this->conn->prepare("INSERT INTO users(unique_id, name, email, encrypted_password, salt, created_at, updated_at) VALUES(?, ?, ?, ?, ?, NOW(), UTC_DATE())");
         $stmt->bind_param("sssss", $uuid, $name, $email, $encrypted_password, $salt);
         $result = $stmt->execute();
         $stmt->close();
@@ -51,9 +51,9 @@ class DB_Functions {
         }
     } 
 	//funkcja do aktualizowania kroków użytkownika
-	public function updateUserSteps($email, $steps) {
-		$stmt = $this->conn->prepare("UPDATE users SET steps=? WHERE email=?");
-		$stmt->bind_param("ss", $steps,  $email);
+	public function updateUserSteps($email, $steps, $updated_at) {
+		$stmt = $this->conn->prepare("UPDATE users SET steps=?,updated_at=? WHERE email=?");
+		$stmt->bind_param("sss", $steps, $updated_at, $email);
 		if ($stmt->execute()) { 
 			$stmt->close(); 
 			return true; 
