@@ -1,4 +1,4 @@
-package loginandregistration.helper;
+package com.SQLiteHelper.helper;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -59,6 +59,14 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         // Ponowne utworzenie aktualnej tabeli
         onCreate(db);
     }
+    //funkcja do update'owania danych w SQLite
+    public void updateUser(String id, String steps){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        db.execSQL("UPDATE " + TABLE_USER +" SET " + KEY_STEPS + " = " + steps + "  WHERE " + KEY_ID + " = " +  id);
+        Log.d(TAG,"Sqlite data updated");
+    }
+
 
     /**
      Zapis danych użytkownika do bazy danych

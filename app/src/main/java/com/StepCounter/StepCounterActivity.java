@@ -1,4 +1,4 @@
-package com.stepcounter;
+package com.StepCounter;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
@@ -7,7 +7,7 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-import com.loginandregistration.R;
+import com.ChildrenEducationApp.R;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -36,9 +36,9 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
-import loginandregistration.app.AppConfig;
-import loginandregistration.app.AppController;
-import loginandregistration.helper.SQLiteHandler;
+import com.SQLiteHelper.app.AppConfig;
+import com.SQLiteHelper.app.AppController;
+import com.SQLiteHelper.helper.SQLiteHandler;
 
 public class StepCounterActivity extends AppCompatActivity implements SensorEventListener {
 
@@ -87,6 +87,7 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
         // pobieranie danych użytkownika z lokalnej bazy danych
         HashMap<String, String> user = db.getUserDetails();
         final String email = user.get("email");
+        final String id = user.get("id");
 
         // SharedPreferences
         mPreferences = getPreferences(MODE_PRIVATE);
@@ -106,7 +107,7 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
         btnSend.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View view) {
-                updateStepsIntoMySql(email,convertStepsToString());
+                updateStepsIntoMySql(email,convertStepsToString(),id);
             }
 
         });
@@ -173,10 +174,11 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
             // pobieranie danych użytkownika z lokalnej bazy danych
             HashMap<String, String> user = db.getUserDetails();
             final String email = user.get("email");
+            final String id = user.get("id");
             try{
                     Log.d("TAG","empty try/catch for update");
             }finally {
-                updateStepsIntoMySql(email,convertStepsToString());
+                updateStepsIntoMySql(email,convertStepsToString(),id);
                 // 5 seconds by default, can be changed later
                 int mInterval = 60000; // update co 1 minute
                 mHandler.postDelayed(mStatusChecker, mInterval);
@@ -208,7 +210,7 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
     }
 
     // funkcja do aktualizowania krokow w MySQL
-    private void updateStepsIntoMySql(final String email, final String steps) { // trzeba konwertowac inta steps do stringa
+    private void updateStepsIntoMySql(final String email, final String steps, final String id) { // trzeba konwertowac inta steps do stringa
         // Tag używany do anulowania żądania
         String tag_string_req = "req_update";
 
@@ -222,6 +224,7 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
             @Override
             public void onResponse(String response) {
                 Log.d(TAG, "Update Response: " + response + " Steps = " + steps); // Dane dotyczące aktualizowania w Logcat'ie
+                db.updateUser(id, steps);
                 hideDialog();
 
             }

@@ -1,4 +1,4 @@
-package loginandregistration.app;
+package com.SQLiteHelper.app;
 
 import android.app.Application;
 import android.text.TextUtils;

@@ -1,4 +1,4 @@
-package loginandregistration.app;
+package com.SQLiteHelper.app;
 
 public class AppConfig {
     // Adres Url pliku php do logowania na serwerze

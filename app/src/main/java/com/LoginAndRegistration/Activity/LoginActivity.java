@@ -1,4 +1,4 @@
-package loginandregistration.activity;
+package com.LoginAndRegistration.Activity;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -15,7 +15,7 @@ import com.android.volley.Request.Method;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-import com.loginandregistration.R;
+import com.ChildrenEducationApp.R;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -23,10 +23,11 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-import loginandregistration.app.AppConfig;
-import loginandregistration.app.AppController;
-import loginandregistration.helper.SQLiteHandler;
-import loginandregistration.helper.SessionManager;
+import com.SQLiteHelper.app.AppConfig;
+import com.SQLiteHelper.app.AppController;
+import com.SQLiteHelper.helper.SQLiteHandler;
+import com.SQLiteHelper.helper.SessionManager;
+import com.Main.MainActivity;
 
 
 public class LoginActivity extends AppCompatActivity {

@@ -1,4 +1,4 @@
-package loginandregistration.activity;
+package com.Main;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -10,11 +10,13 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.loginandregistration.R;
-import com.stepcounter.StepCounterActivity;
+import com.ChildrenEducationApp.R;
+import com.StepCounter.StepCounterActivity;
 
-import loginandregistration.helper.SQLiteHandler;
-import loginandregistration.helper.SessionManager;
+import com.SQLiteHelper.helper.SQLiteHandler;
+import com.SQLiteHelper.helper.SessionManager;
+
+import com.LoginAndRegistration.Activity.LoginActivity;
 
 public class MainActivity extends AppCompatActivity {
 

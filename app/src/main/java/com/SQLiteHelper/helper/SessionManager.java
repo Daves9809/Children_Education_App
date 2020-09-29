@@ -1,4 +1,4 @@
-package loginandregistration.helper;
+package com.SQLiteHelper.helper;
 
 import android.content.Context;
 import android.content.SharedPreferences;
