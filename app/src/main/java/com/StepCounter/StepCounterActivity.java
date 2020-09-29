@@ -68,32 +68,12 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
             //ask for permission
             requestPermissions(new String[]{Manifest.permission.ACTIVITY_RECOGNITION}, 1);
         }
-        mHandler = new Handler();
+        initializeVariables();
 
-        textViewStepCounter =  findViewById(R.id.textViewStepCounter);
-        textViewStepDetector =  findViewById(R.id.textViewStepDetector);
-        btnButton =  findViewById(R.id.btnButton);
-        btnSend =  findViewById(R.id.btnSend);
-
-        pDialog = new ProgressDialog(this);
-        pDialog.setCancelable(false);
-
-        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-
-        countSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
-
-        // Lokalna baza danych SQLite
-        db = new SQLiteHandler(getApplicationContext());
         // pobieranie danych użytkownika z lokalnej bazy danych
         HashMap<String, String> user = db.getUserDetails();
         final String email = user.get("email");
         final String id = user.get("id");
-
-        // SharedPreferences
-        mPreferences = getPreferences(MODE_PRIVATE);
-        editor = mPreferences.edit();
-
-
 
         btnButton.setOnClickListener(new View.OnClickListener() {
 
@@ -114,6 +94,28 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
         getStepsFromMySql(email); // jednorazowe pobranie liczby krokow z MySql po przejsciu do tej aktywnosci
         startRepeatingTask(); // funkcja aktualizująca liczbę kroków z bazą danych co minutę
 
+    }
+    private void initializeVariables(){
+        mHandler = new Handler();
+
+        textViewStepCounter =  findViewById(R.id.textViewStepCounter);
+        textViewStepDetector =  findViewById(R.id.textViewStepDetector);
+        btnButton =  findViewById(R.id.btnButton);
+        btnSend =  findViewById(R.id.btnSend);
+
+        pDialog = new ProgressDialog(this);
+        pDialog.setCancelable(false);
+
+        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+
+        countSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
+
+        // Lokalna baza danych SQLite
+        db = new SQLiteHandler(getApplicationContext());
+
+        // SharedPreferences
+        mPreferences = getPreferences(MODE_PRIVATE);
+        editor = mPreferences.edit();
     }
 
     @Override

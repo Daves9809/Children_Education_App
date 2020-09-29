@@ -63,7 +63,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
     public void updateUser(String id, String steps){
         SQLiteDatabase db = this.getWritableDatabase();
 
-        db.execSQL("UPDATE " + TABLE_USER +" SET " + KEY_STEPS + " = " + steps + "  WHERE " + KEY_ID + " = " +  id);
+        db.execSQL("UPDATE " + TABLE_USER +" SET " + KEY_STEPS + " = " + steps + "  WHERE " + KEY_ID + " = " + 1);
         Log.d(TAG,"Sqlite data updated");
     }
 
