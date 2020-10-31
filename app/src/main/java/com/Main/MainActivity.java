@@ -17,6 +17,10 @@ import com.SQLiteHelper.helper.SQLiteHandler;
 import com.SQLiteHelper.helper.SessionManager;
 
 import com.LoginAndRegistration.Activity.LoginActivity;
+import com.tinytinybites.android.pvzquiz.activity.DashboardActivity;
+import com.tinytinybites.android.pvzquiz.activity.QuizActivity;
+
+import sarveshchavan777.quizgame.QuestionActivity;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -24,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView txtEmail;
     private Button btnLogout;
     private Button btnPlay;
+    private Button btnStatistics;
 
     private SQLiteHandler db;
     private SessionManager session;
@@ -38,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
         txtName = (TextView) findViewById(R.id.name);
         btnLogout = (Button) findViewById(R.id.btnLogout);
         btnPlay = (Button) findViewById(R.id.btnPlay);
+        btnStatistics = (Button) findViewById(R.id.btnInfo);
 
         // Definiowanie lokalnego programu obsługi bazy danych
         db = new SQLiteHandler(getApplicationContext());
@@ -74,6 +80,17 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        btnStatistics.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, DashboardActivity.class);
+                startActivity(intent);
+            }
+        });
+
+
     }
 
     /**

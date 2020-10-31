@@ -1,2 +1,5 @@
 include ':app'
+include ':quizmath'
+include ':quizmath_2'
+
 rootProject.name = "MainActivity"

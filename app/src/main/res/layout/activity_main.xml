@@ -15,7 +15,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/witaj"
-            android:textSize="20dp" />
+            android:textSize="20sp" />
 
         <TextView
             android:id="@+id/name"
@@ -23,14 +23,14 @@
             android:layout_height="wrap_content"
             android:padding="10dp"
             android:textColor="@color/lbl_name"
-            android:textSize="24dp" />
+            android:textSize="24sp" />
         <TextView
             android:id="@+id/choose"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="10dp"
             android:text="@string/wybor"
-            android:textSize="24dp" />
+            android:textSize="24sp" />
         <Button
             android:id="@+id/btnPlay"
             android:layout_width="fill_parent"
@@ -75,6 +75,6 @@
         android:text="@string/btn_logout"
         android:textAllCaps="false"
         android:textColor="@color/white"
-        android:textSize="15dp" />
+        android:textSize="15sp" />
 
 </RelativeLayout>
