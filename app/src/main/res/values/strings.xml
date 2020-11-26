@@ -21,4 +21,5 @@
     <string name="steps">STEPS:</string>
     <string name="reset">Reset</string>
     <string name="send_data">Send Data</string>
+    <string name="quiz_summary" translatable="true">Question %1$d of %2$d</string>
 </resources>

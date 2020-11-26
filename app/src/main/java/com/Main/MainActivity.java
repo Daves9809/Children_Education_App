@@ -2,6 +2,7 @@ package com.Main;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.os.Bundle;
 import java.util.HashMap;
 
@@ -11,15 +12,15 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.ChildrenEducationApp.R;
+import com.SQLiteHelper.app.AppController;
 import com.StepCounter.StepCounterActivity;
 
 import com.SQLiteHelper.helper.SQLiteHandler;
 import com.SQLiteHelper.helper.SessionManager;
 
 import com.LoginAndRegistration.Activity.LoginActivity;
-import com.tinytinybites.android.pvzquiz.activity.DashboardActivity;
-import com.tinytinybites.android.pvzquiz.activity.QuizActivity;
 
+import diamon.wordee.MainActivityWordee;
 import sarveshchavan777.quizgame.QuestionActivity;
 
 public class MainActivity extends AppCompatActivity {
@@ -29,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
     private Button btnLogout;
     private Button btnPlay;
     private Button btnStatistics;
+    private Button btnSettings;
 
     private SQLiteHandler db;
     private SessionManager session;
@@ -39,11 +41,14 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //przypisanie zmiennym odpowiednich elementów w przestrzeni activity_main.xml
+        Context context = AppController.getInstance();
+
+        //przypisanie zmiennym odpowiednich elementów w przestrzeni activity_mainn.xml
         txtName = (TextView) findViewById(R.id.name);
         btnLogout = (Button) findViewById(R.id.btnLogout);
         btnPlay = (Button) findViewById(R.id.btnPlay);
         btnStatistics = (Button) findViewById(R.id.btnInfo);
+        btnSettings = (Button) findViewById(R.id.btnSettings) ;
 
         // Definiowanie lokalnego programu obsługi bazy danych
         db = new SQLiteHandler(getApplicationContext());
@@ -76,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, StepCounterActivity.class);
+                Intent intent = new Intent(MainActivity.this, QuestionActivity.class);
                 startActivity(intent);
             }
         });
@@ -85,7 +90,16 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, DashboardActivity.class);
+                Intent intent = new Intent(MainActivity.this, QuestionActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        btnSettings.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, MainActivityWordee.class);
                 startActivity(intent);
             }
         });

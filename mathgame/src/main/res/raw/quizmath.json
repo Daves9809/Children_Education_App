@@ -1,0 +1,82 @@
+{
+  "categories": [
+    {
+      "category": "1",
+      "quizes": [
+        {
+          "question": "10 + 12 + 3",
+          "choices": ["23","25","24","25"]
+
+        },{
+          "question": "7 + 8 - 3",
+          "choices": ["12","5","6","5"]
+
+        },{
+          "question": "6 + 17",
+          "choices": ["21","24","23","23"]
+
+        },{
+          "question": "13 + 8 + 4",
+          "choices": ["24","25","26","25"]
+
+        },{
+          "question": "16 + 12",
+          "choices": ["26","29","28","28"]
+
+        }
+      ]
+    },
+    {
+      "category": "2",
+      "quizes": [
+        {
+          "question": "3 x 3",
+          "choices": ["8","7","9","9"]
+
+        },{
+          "question": "3 x 4",
+          "choices": ["10","13","12","12"]
+
+        },{
+          "question": "5 x 6",
+          "choices": ["comet","milionymonet","dupa","comet"]
+
+        },{
+          "question": "8 x 6",
+          "choices": ["48","46","44","48"]
+
+        },{
+          "question": "11x4",
+          "choices": ["42","41","44","44"]
+
+        }
+      ]
+    },
+    {
+      "category": "3",
+      "quizes": [
+        {
+          "question": "3 x 4 : 2",
+          "choices": ["6","7","9","6"]
+
+        },{
+          "question": "2 x 4 -5",
+          "choices": ["1","5","3","3"]
+
+        },{
+          "question": "5 x 6 + 4 : 2",
+          "choices": ["31","34","32","32"]
+
+        },{
+          "question": "6 x 6 - 6 x 2",
+          "choices": ["30","60","24","24"]
+
+        },{
+          "question": "5 x 4 - 2 x 8",
+          "choices": ["40","80","4","4"]
+
+        }
+      ]
+    }
+  ]
+}

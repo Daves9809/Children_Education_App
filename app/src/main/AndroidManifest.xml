@@ -27,7 +27,19 @@
             />
 
         <activity
-            android:name="com.tinytinybites.android.pvzquiz.activity.DashboardActivity" />
+            android:name="diamon.wordee.MainActivityWordee" />
+        <activity
+            android:name="com.quizgame.QuestionActivityy" />
+        <activity
+            android:name="com.quizgame.ResultActivity" />
+        <activity
+            android:name="com.quizgame.won" />
+        <activity
+            android:name="sarveshchavan777.quizgame.QuestionActivity" />
+        <activity
+            android:name="sarveshchavan777.quizgame.won" />
+        <activity
+            android:name="sarveshchavan777.quizgame.ResultActivity" />
 
         <activity
             android:name="com.LoginAndRegistration.Activity.LoginActivity"

@@ -1,5 +1,6 @@
 include ':app'
-include ':quizmath'
-include ':quizmath_2'
+include ':mathgame'
+include ':wordee'
+include ':sciencegame'
 
 rootProject.name = "MainActivity"
