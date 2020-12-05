@@ -10,15 +10,13 @@ $response = array("error" => FALSE);
     $steps = $_POST['steps'];
 	$email = $_POST['email'];
 	$updated_at = $_POST['updated_at'];
-	$points = $_POST['points'];
-	$game = $_POST['game'];
 
-if($db->updateUserSteps($email, $steps, $updated_at,$points,$game)){
+if($db->updateUserSteps($email, $steps, $updated_at)){
 	$response["msg"] = "Dane wyslane";
     echo json_encode($response);
 }else{
 	$response["error"] = TRUE;
-    $response["error_msg"] = "Kroki i punkty nie zostaly zaktualizowane, nastapil blad";
+    $response["error_msg"] = "Kroki nie zostaly zaktualizowane, nastapil blad";
     echo json_encode($response);
 }
 ?>

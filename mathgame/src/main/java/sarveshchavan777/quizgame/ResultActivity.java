@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 public class ResultActivity extends Activity {
 
+    int score;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -19,7 +20,7 @@ public class ResultActivity extends Activity {
 
         Bundle b = getIntent().getExtras();
 
-        int score = b.getInt("score");
+        score = b.getInt("score");
 
         textResult.setText("Wrong answer sorry!! Your points are " + " " + score);
 
@@ -31,7 +32,9 @@ public class ResultActivity extends Activity {
         try {
             intent = new Intent(ResultActivity.this,
                     Class.forName("diamon.wordee.MainActivityWordee"));
+            intent.putExtra("appScore",score);
             startActivity(intent);
+            finish();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }

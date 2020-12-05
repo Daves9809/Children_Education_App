@@ -4,12 +4,17 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
 import android.os.Bundle;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.HashMap;
 
 import android.content.Intent;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.ChildrenEducationApp.R;
 import com.SQLiteHelper.app.AppController;
@@ -61,10 +66,9 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // pobieranie danych użytkownika z lokalnej bazy danych
-        HashMap<String, String> user = db.getUserDetails();
+        final HashMap<String, String> user = db.getUserDetails();
 
         String name = user.get("name");
-
         // Wyświetlenie danych podstawowych danych użytkownika na ekranie
         txtName.setText(name);
 
@@ -81,8 +85,48 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, QuestionActivity.class);
-                startActivity(intent);
+                String game;
+                String steps;
+                String points = user.get("points");
+                String updated_at = user.get("updated_at");
+                Log.d("UPDATED_AT:",updated_at);
+
+                if(!updated_at.equals(today() + " 00:00:00")){ // jeśli dzień się zmienił zerujemy gry i kroki
+
+                    game = "0";
+                    steps = "0"; // ??
+
+                        if(Integer.parseInt(game) >= 3){
+                            Intent intent = new Intent(MainActivity.this, StepCounterActivity.class);
+                            intent.putExtra("updated_at",updated_at);
+                            startActivity(intent);
+                            finish();
+                            Log.d("mainActivity:","1 "+ updated_at + " " + today());
+
+                        } else{
+                            Intent intent = new Intent(MainActivity.this, QuestionActivity.class);
+                            startActivity(intent);
+                            finish();
+                            Log.d("mainActivity:","2 "+ updated_at + " " + today());
+                        }
+
+
+                } else if(updated_at.equals(today() + " 00:00:00")){ // jeśli dzień się nie zmienił kontynuujemy rozpoczęty proces
+
+                    game = user.get("game");
+
+                    if(game.equals("null")){
+                        Intent intent = new Intent(MainActivity.this, QuestionActivity.class);
+                        startActivity(intent);
+                        finish();
+                        Log.d("mainActivity:","4 "+ updated_at + " " + today() + " 00:00:00");
+                    } else{
+                        Log.d("mainActivity:","5 "+ updated_at + " " + today());
+                        Toast.makeText(getApplicationContext(), "Wykonałeś wszystkie zadania, wróc ponownie jutro!", Toast.LENGTH_LONG).show();
+                    }
+                }
+
+
             }
         });
 
@@ -120,5 +164,9 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(MainActivity.this, LoginActivity.class);
         startActivity(intent);
         finish();
+    }
+    public String today() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        return sdf.format(Calendar.getInstance().getTime());
     }
 }

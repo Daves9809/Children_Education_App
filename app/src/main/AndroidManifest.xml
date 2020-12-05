@@ -24,6 +24,7 @@
         android:theme="@style/AppTheme">
         <activity android:name="com.StepCounter.StepCounterActivity"
             android:label="@string/step_counter"
+            android:noHistory="true"
             />
 
         <activity
@@ -33,7 +34,7 @@
         <activity
             android:name="com.quizgame.ResultActivity" />
         <activity
-            android:name="com.quizgame.won" />
+            android:name="com.quizgame.wonn" />
         <activity
             android:name="sarveshchavan777.quizgame.QuestionActivity" />
         <activity

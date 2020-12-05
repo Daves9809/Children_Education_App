@@ -16,6 +16,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 
+
 public class QuestionActivity extends Activity {
     List<Question> quesList;
     int score = 0;
@@ -40,7 +41,6 @@ public class QuestionActivity extends Activity {
         button1 = (Button) findViewById(R.id.button1);
         button2 = (Button) findViewById(R.id.button2);
         button3 = (Button) findViewById(R.id.button3);
-        Log.d("sciencegame","....");
 
 
 
@@ -156,7 +156,6 @@ public class QuestionActivity extends Activity {
                     TimeUnit.MILLISECONDS.toSeconds(millis)
                             - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS
                             .toMinutes(millis)));
-            System.out.println(hms);
             times.setText(hms);
         }
 

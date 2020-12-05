@@ -33,7 +33,7 @@ import com.Main.MainActivity;
 public class LoginActivity extends AppCompatActivity {
 
     //definiowanie zmiennych
-    private static final String TAG = RegisterActivity.class.getSimpleName();
+    private static final String TAG = LoginActivity.class.getSimpleName();
     private Button btnLogin;
     private Button btnLinkToRegister;
     private EditText inputEmail;
@@ -143,12 +143,13 @@ public class LoginActivity extends AppCompatActivity {
                         String email = user.getString("email");
                         String steps = user.getString("steps");
                         String points = user.getString("points");
+                        String game = user.getString("game");
                         String created_at = user
                                 .getString("created_at");
                         String updated_at = user
                                 .getString("updated_at");
                         // Wstawianie wiersza w tabeli użytkowników
-                        db.addUser(name, email, uid, steps, points, created_at,updated_at);
+                        db.addUser(name, email, uid, steps, points, game, created_at,updated_at);
 
                         // Inicjacja MainActivity
                         Intent intent = new Intent(LoginActivity.this,
