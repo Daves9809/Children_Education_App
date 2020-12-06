@@ -7,13 +7,14 @@ $db = new DB_Functions(); // tutaj nastepuje łączenie z bazą danych
 $response = array("error" => FALSE);
 
 // odbieranie danych do wysłania
-    $steps = $_POST['steps'];
 	$email = $_POST['email'];
+    $steps = $_POST['steps'];
 	$updated_at = $_POST['updated_at'];
 	$points = $_POST['points'];
 	$game = $_POST['game'];
+	$level = $_POST['level'];
 
-if($db->updateUserSteps($email, $steps, $updated_at,$points,$game)){
+if($db->updateUserSteps($email, $steps, $updated_at,$points,$game,$level)){
 	$response["msg"] = "Dane wyslane";
     echo json_encode($response);
 }else{

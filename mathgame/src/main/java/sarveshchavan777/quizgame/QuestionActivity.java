@@ -21,6 +21,7 @@ public class QuestionActivity extends Activity {
     List<Question> quesList;
     int score = 0;
     int qid = 0;
+    String level;
 
 
     Question currentQ;
@@ -33,16 +34,19 @@ public class QuestionActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mainn);
 
-        QuizHelper db = new QuizHelper(this);
-        quesList = db.getAllQuestions();
-        currentQ = quesList.get(qid);
-
         txtQuestion = (TextView) findViewById(R.id.txtQuestion);
         button1 = (Button) findViewById(R.id.button1);
         button2 = (Button) findViewById(R.id.button2);
         button3 = (Button) findViewById(R.id.button3);
 
+        Bundle extras = getIntent().getExtras(); // pobieranie punktow z poprzedniej aktywnosci
+        if (extras != null) {
+            level = extras.getString("level");
+        }
 
+        QuizHelper db = new QuizHelper(this,level);
+        quesList = db.getAllQuestions();
+        currentQ = quesList.get(qid);
 
 
         scored = (TextView) findViewById(R.id.score);
@@ -102,6 +106,7 @@ public class QuestionActivity extends Activity {
 
             Bundle b = new Bundle();
             b.putInt("score", score);
+            b.putString("level",level);
             intent.putExtras(b);
             startActivity(intent);
             finish();
@@ -117,6 +122,7 @@ public class QuestionActivity extends Activity {
             Intent intent = new Intent(QuestionActivity.this,won.class);
             Bundle b = new Bundle();
             b.putInt("score",score);
+            b.putString("level",level);
             intent.putExtras(b);
             startActivity(intent);
             finish();

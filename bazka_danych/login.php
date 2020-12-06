@@ -29,6 +29,7 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
 		$response["user"]["steps"] = $user["steps"];
 		$response["user"]["points"] = $user["points"];
 		$response["user"]["game"] = $user["game"];
+		$response["user"]["level"] = $user["level"];
         $response["user"]["created_at"] = $user["created_at"];
         $response["user"]["updated_at"] = $user["updated_at"];
         echo json_encode($response);

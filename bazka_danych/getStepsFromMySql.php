@@ -20,6 +20,7 @@ $response = array("error" => FALSE);
         $response["user"]["email"] = $user["email"];
 		$response["user"]["points"] = $user["points"];
 		$response["user"]["game"] = $user["game"];
+		$response["user"]["level"] = $user["level"];
 		$response["user"]["updated_at"] = $user["updated_at"];
         echo json_encode($response);
 }else{

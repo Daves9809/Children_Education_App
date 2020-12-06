@@ -16,6 +16,7 @@ import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
@@ -61,6 +62,7 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
     private int game;
     private String email;
     private String uid;
+    private String level;
 
 
     @SuppressLint("CommitPrefEdits")
@@ -88,6 +90,8 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
         HashMap<String, String> user = db.getUserDetails();
         email = user.get("email");
         uid = user.get("uid");
+        level = user.get("level");
+
         Log.e(TAG,"EMAIL: " + email);
         Log.e(TAG,"uid: " + uid);
 
@@ -105,16 +109,11 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
         btnSend.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View view) {
-                updateStepsIntoMySql(email,convertStepsToString(),uid);
+                updateStepsIntoMySql(email,convertStepsToString(),level,uid);
             }
 
         });
         getStepsFromMySql(email,uid); // jednorazowe pobranie danych(kroki, gra, punkty) z MySql po przejsciu do tej aktywnosci
-        if(game == 0){
-            game = Integer.parseInt(user.get("game"));
-            appScore = Integer.parseInt(user.get("points"));
-        }
-//        startRepeatingTask(); // funkcja aktualizująca liczbę kroków z bazą danych co minutę
     }
     private void initializeVariables(){
         mHandler = new Handler();
@@ -179,9 +178,9 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
         if (todaySteps == 0) {
             savePreferences(today(), 1); // zapisujemy dane, key- data dzisiejszego dnia, value - liczba krokow dzisiaj
         }
-        else if(todaySteps == 10){
+        else if(todaySteps == Integer.parseInt(level) *10){
             savePreferences(today(), 10);
-            updateStepsIntoMySql(email,String.valueOf(10),uid);
+            updateStepsIntoMySql(email,String.valueOf(10),level,uid);
             editor.clear().commit();
             Intent intent = new Intent(StepCounterActivity.this, MainActivity.class);
             intent.putExtra("game",4);
@@ -202,33 +201,7 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
     }
-//
-//    Runnable mStatusChecker = new Runnable() { //
-//        @Override
-//        public void run() {
-//            // Lokalna baza danych SQLite
-//            db = new SQLiteHandler(getApplicationContext());
-//            // pobieranie danych użytkownika z lokalnej bazy danych
-//            HashMap<String, String> user = db.getUserDetails();
-//            final String email = user.get("email");
-//            final String id = user.get("id");
-//            try{
-//                    Log.d("TAG","empty try/catch for update");
-//            }finally {
-//                updateStepsIntoMySql(email,convertStepsToString(),id);
-//                // 5 seconds by default, can be changed later
-//                int mInterval = 60000; // update co 1 minute
-//                mHandler.postDelayed(mStatusChecker, mInterval);
-//            }
-//        }
-//    };
 
-//    void startRepeatingTask() {
-//        mStatusChecker.run();
-//    }
-//    void stopRepeatingTask() {
-//        mHandler.removeCallbacks(mStatusChecker);
-//    }
 
     private void savePreferences(String key, int value) {
         Log.d("TAG","Preferences saved, steps = " + value);
@@ -247,7 +220,7 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
     }
 
     // funkcja do aktualizowania krokow w MySQL
-    private void updateStepsIntoMySql(final String email, final String steps, final String id) { // trzeba konwertowac inta steps do stringa
+    private void updateStepsIntoMySql(final String email, final String steps,final String level, final String id) { // trzeba konwertowac inta steps do stringa
         // Tag używany do anulowania żądania
         String tag_string_req = "req_update";
         showDialog();
@@ -258,9 +231,9 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
             // funkcja odbierająca odpowiedz
             @Override
             public void onResponse(String response) {
-                Log.d(TAG, "Update Response: " + response + " Steps = " + steps + " Points= " + appScore+ " Game= " + game); // Dane dotyczące aktualizowania w Logcat'ie
-                db.updateUser(id, steps,appScore,game,today());
-                Log.w(TAG,"UPDATED_AT: " + today());
+                Log.d(TAG, "Update Response: " + response + " Steps = " + steps + " Points= " + appScore+ " Game= " + game + " Level= " + level + " today()= " + today()); // Dane dotyczące aktualizowania w Logcat'ie
+
+                db.updateUser(id, steps,appScore,game,Integer.parseInt(level),today());
                 hideDialog();
 
             }
@@ -280,11 +253,12 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
             protected Map<String, String> getParams() {
                 // Wysyłanie parametrów do adresu url logowania
                 Map<String, String> params = new HashMap<>();
+                params.put("email", email);
                 params.put("steps", steps);
-                params.put("updated_at",today()); // updateowanie daty
+                params.put("updated_at",today());
                 params.put("points",String.valueOf(appScore));
                 params.put("game", String.valueOf(game));
-                params.put("email", email);
+                params.put("level",level);
 
                 return params;
             }
@@ -322,21 +296,33 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
                         JSONObject user = jObj.getJSONObject("user");
                         String steps = user.getString("steps");
                         String updated_at = user.getString("updated_at");
-                        Log.e(TAG,updated_at);
                         String points = user.getString("points");
                         String game = user.getString("game");
                         if(updated_at.equals(today() + " 00:00:00")) {
-                            if(!steps.equals("null")) {
-                                db.updateUser(id, steps, Integer.parseInt(points), Integer.parseInt(game),today());
+                            if(!steps.equals("null") && Integer.parseInt(steps) < (Integer.parseInt(level) *10)) {
+                                db.updateUser(id, steps, Integer.parseInt(points), Integer.parseInt(game),Integer.parseInt(level),today());
                                 savePreferences(today(), Integer.parseInt(steps));
+                                Log.w(TAG,"1");
                             }
-                            else {
-                                db.updateUser(id, "0", 0, 0,today());
+                            else if(steps.equals("null")){ // kiedy konto jest nowe
+                                db.updateUser(id, "0", 0, 0,1,today());
                                 savePreferences(today(), 0);
+                                Log.w(TAG,"2");
+                            }
+                            else{
+                                Log.w(TAG,"3");
+                                Intent intent = new Intent(StepCounterActivity.this, MainActivity.class);
+                                intent.putExtra("game",4);
+                                startActivity(intent);
+                                finish();
                             }
                         }
-                        else
+                        else{
+                            Log.w(TAG,"4");
+                            Log.w("updated_at= ",updated_at);
+                            Log.w("today()= ",today());
                             savePreferences(today(),0);
+                        }
 
                     } catch (JSONException e) {
                     e.printStackTrace();

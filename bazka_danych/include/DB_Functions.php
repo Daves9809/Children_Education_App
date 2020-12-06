@@ -32,14 +32,14 @@ class DB_Functions {
         $encrypted_password = $hash["encrypted"]; // encrypted password
         $salt = $hash["salt"]; // salt
 
-        $stmt = $this->conn->prepare("INSERT INTO userss(unique_id, name, email, encrypted_password, salt, created_at, updated_at) VALUES(?, ?, ?, ?, ?, NOW(), UTC_DATE())");
+        $stmt = $this->conn->prepare("INSERT INTO users(unique_id, name, email, encrypted_password, salt, level, created_at, updated_at) VALUES(?, ?, ?, ?, ?, 1, NOW(), UTC_DATE())");
         $stmt->bind_param("sssss", $uuid, $name, $email, $encrypted_password, $salt);
         $result = $stmt->execute();
         $stmt->close();
 
         // check for successful store
         if ($result) {
-            $stmt = $this->conn->prepare("SELECT * FROM userss WHERE email = ?");
+            $stmt = $this->conn->prepare("SELECT * FROM users WHERE email = ?");
             $stmt->bind_param("s", $email);
             $stmt->execute();
             $user = $stmt->get_result()->fetch_assoc();
@@ -51,9 +51,9 @@ class DB_Functions {
         }
     } 
 	//funkcja do aktualizowania kroków użytkownika
-	public function updateUserSteps($email, $steps, $updated_at,$points,$game) {
-		$stmt = $this->conn->prepare("UPDATE userss SET steps=?,updated_at=?,points = ?,game = ? WHERE email=?");
-		$stmt->bind_param("sssss", $steps, $updated_at,$points,$game,$email);
+	public function updateUserSteps($email, $steps, $updated_at,$points,$game,$level) {
+		$stmt = $this->conn->prepare("UPDATE users SET steps=?,updated_at=?,points =?,game =?,level =? WHERE email=?");
+		$stmt->bind_param("ssssss", $steps, $updated_at,$points,$game,$email,$level);
 		if ($stmt->execute()) { 
 			$stmt->close(); 
 			return true; 
@@ -69,7 +69,7 @@ class DB_Functions {
      */
     public function getUserByEmailAndPassword($email, $password) {
 
-        $stmt = $this->conn->prepare("SELECT * FROM userss WHERE email = ?");
+        $stmt = $this->conn->prepare("SELECT * FROM users WHERE email = ?");
 
         $stmt->bind_param("s", $email);
 
@@ -92,8 +92,8 @@ class DB_Functions {
     }
 	
 	public function getUserPointsByEmail($email){
-		//$stmt = $this->conn->prepare("SELECT steps FROM userss WHERE email = ?");
-		$stmt = $this->conn->prepare("SELECT * FROM userss WHERE email = ?");
+		//$stmt = $this->conn->prepare("SELECT steps FROM users WHERE email = ?");
+		$stmt = $this->conn->prepare("SELECT * FROM users WHERE email = ?");
 		$stmt->bind_param("s", $email);
 		if ($stmt->execute()) {
 			$user = $stmt->get_result()->fetch_assoc();
@@ -110,7 +110,7 @@ class DB_Functions {
      * Check user is existed or not
      */
     public function isUserExisted($email) {
-        $stmt = $this->conn->prepare("SELECT email from userss WHERE email = ?");
+        $stmt = $this->conn->prepare("SELECT email from users WHERE email = ?");
 
         $stmt->bind_param("s", $email);
 

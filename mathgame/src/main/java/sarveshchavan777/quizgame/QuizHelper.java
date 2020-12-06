@@ -34,12 +34,14 @@ public class QuizHelper extends SQLiteOpenHelper {
     private static final String KEY_OPTA = "opta";
     private static final String KEY_OPTB = "optb";
     private static final String KEY_OPTC = "optc";
+    String level;
 
     private SQLiteDatabase dbase;
 
-    public QuizHelper(Context context) {
+    public QuizHelper(Context context, String level) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
         this.context = context;
+        this.level = level;
     }
 
     @Override
@@ -65,7 +67,7 @@ public class QuizHelper extends SQLiteOpenHelper {
             JSONArray quizesCategoriesArray = quizObject.getJSONArray("categories"); // creating variable of categories
             String category = null; // varable initialization
             for (int i = 0; i < quizesCategoriesArray.length(); i++) { // iterating over categories
-                if(quizesCategoriesArray.getJSONObject(i).getString("category").equals("1")) { // jesli category = 1
+                if(quizesCategoriesArray.getJSONObject(i).getString("category").equals(level)) { // jesli category = 1
                     JSONArray quizesJsonArray = quizesCategoriesArray.getJSONObject(i).getJSONArray("quizes");
                     for (int j = 0; j < quizesJsonArray.length(); j++) {   // iterujemy po quizach
                         String question = quizesJsonArray.getJSONObject(j).getString("question"); // pobieranie pytania

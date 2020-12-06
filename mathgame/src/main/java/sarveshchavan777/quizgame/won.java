@@ -23,6 +23,7 @@ public class won extends Activity {
         btn = (Button) findViewById(R.id.btnNextIntent);
         Bundle b = getIntent().getExtras();
         final int y = b.getInt("score");
+        final String level = b.getString("level");
         tv.setText("FINAL SCORE:" + y);
         btn.setOnClickListener(new View.OnClickListener() {
 
@@ -33,6 +34,7 @@ public class won extends Activity {
                     intent = new Intent(won.this,
                             Class.forName("diamon.wordee.MainActivityWordee"));
                     intent.putExtra("appScore",y);
+                    intent.putExtra("level",level);
                     startActivity(intent);
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();

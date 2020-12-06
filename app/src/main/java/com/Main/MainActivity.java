@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Context;
 import android.os.Bundle;
 
+import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -16,6 +17,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.ChildrenEducationApp.BuildConfig;
 import com.ChildrenEducationApp.R;
 import com.SQLiteHelper.app.AppController;
 import com.StepCounter.StepCounterActivity;
@@ -24,6 +26,8 @@ import com.SQLiteHelper.helper.SQLiteHandler;
 import com.SQLiteHelper.helper.SessionManager;
 
 import com.LoginAndRegistration.Activity.LoginActivity;
+import com.amitshekhar.DebugDB;
+import com.facebook.stetho.Stetho;
 
 import diamon.wordee.MainActivityWordee;
 import sarveshchavan777.quizgame.QuestionActivity;
@@ -65,9 +69,8 @@ public class MainActivity extends AppCompatActivity {
             logoutUser();
         }
 
-        // pobieranie danych użytkownika z lokalnej bazy danych
-        final HashMap<String, String> user = db.getUserDetails();
 
+        HashMap<String, String> user = db.getUserDetails();
         String name = user.get("name");
         // Wyświetlenie danych podstawowych danych użytkownika na ekranie
         txtName.setText(name);
@@ -85,13 +88,15 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
+                // pobieranie danych użytkownika z lokalnej bazy danych
+                HashMap<String, String> user = db.getUserDetails();
                 String game;
                 String steps;
                 String points = user.get("points");
                 String updated_at = user.get("updated_at");
-                Log.d("UPDATED_AT:",updated_at);
+                String level = user.get("level");
 
-                if(!updated_at.equals(today() + " 00:00:00")){ // jeśli dzień się zmienił zerujemy gry i kroki
+                if(!updated_at.equals(today())){ // jeśli dzień się zmienił zerujemy gry i kroki
 
                     game = "0";
                     steps = "0"; // ??
@@ -105,18 +110,20 @@ public class MainActivity extends AppCompatActivity {
 
                         } else{
                             Intent intent = new Intent(MainActivity.this, QuestionActivity.class);
+                            intent.putExtra("level",level);
                             startActivity(intent);
                             finish();
                             Log.d("mainActivity:","2 "+ updated_at + " " + today());
                         }
 
 
-                } else if(updated_at.equals(today() + " 00:00:00")){ // jeśli dzień się nie zmienił kontynuujemy rozpoczęty proces
+                } else if(updated_at.equals(today())){ // jeśli dzień się nie zmienił kontynuujemy rozpoczęty proces
 
                     game = user.get("game");
 
                     if(game.equals("null")){
                         Intent intent = new Intent(MainActivity.this, QuestionActivity.class);
+                        intent.putExtra("level",level);
                         startActivity(intent);
                         finish();
                         Log.d("mainActivity:","4 "+ updated_at + " " + today() + " 00:00:00");
@@ -148,7 +155,19 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        Stetho.initializeWithDefaults(this);
+    }
+    public static void showDebugDBAddressLogToast(Context context) {
+        if (BuildConfig.DEBUG) {
+            try {
+                Class<?> debugDB = Class.forName("com.amitshekhar.DebugDB");
+                Method getAddressLog = debugDB.getMethod("getAddressLog");
+                Object value = getAddressLog.invoke(null);
+                Toast.makeText(context, (String) value, Toast.LENGTH_LONG).show();
+            } catch (Exception ignore) {
 
+            }
+        }
     }
 
     /**
