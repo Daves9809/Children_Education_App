@@ -32,7 +32,7 @@ class DB_Functions {
         $encrypted_password = $hash["encrypted"]; // encrypted password
         $salt = $hash["salt"]; // salt
 
-        $stmt = $this->conn->prepare("INSERT INTO users(unique_id, name, email, encrypted_password, salt, level, created_at, updated_at) VALUES(?, ?, ?, ?, ?, 1, NOW(), UTC_DATE())");
+        $stmt = $this->conn->prepare("INSERT INTO users(unique_id, name, email, encrypted_password, salt, poziom, created_at, updated_at) VALUES(?, ?, ?, ?, ?, '1', NOW(), UTC_DATE())");
         $stmt->bind_param("sssss", $uuid, $name, $email, $encrypted_password, $salt);
         $result = $stmt->execute();
         $stmt->close();
@@ -51,9 +51,9 @@ class DB_Functions {
         }
     } 
 	//funkcja do aktualizowania kroków użytkownika
-	public function updateUserSteps($email, $steps, $updated_at,$points,$game,$level) {
-		$stmt = $this->conn->prepare("UPDATE users SET steps=?,updated_at=?,points =?,game =?,level =? WHERE email=?");
-		$stmt->bind_param("ssssss", $steps, $updated_at,$points,$game,$email,$level);
+	public function updateUserSteps($email, $steps, $updated_at,$points,$game,$poziom) {
+		$stmt = $this->conn->prepare("UPDATE users SET steps=?,updated_at=?,points =?,game =?,poziom =? WHERE email=?");
+		$stmt->bind_param("ssssss", $steps, $updated_at,$points,$game,$poziom,$email);
 		if ($stmt->execute()) { 
 			$stmt->close(); 
 			return true; 

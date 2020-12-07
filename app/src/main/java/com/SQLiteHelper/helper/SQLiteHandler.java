@@ -31,7 +31,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
     private static final String KEY_POINTS = "points";
     private static final String KEY_STEPS = "steps";
     private static final String KEY_GAME = "game";
-    private static final String KEY_LEVEL = "level";
+    private static final String KEY_POZIOM = "poziom";
 
     public SQLiteHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -46,7 +46,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
                 + KEY_STEPS + " INTEGER,"
                 + KEY_POINTS + " INTEGER,"
                 + KEY_GAME + " INTEGER,"
-                + KEY_LEVEL + " INTEGER,"
+                + KEY_POZIOM + " INTEGER,"
                 + KEY_CREATED_AT + " TEXT,"
                 + KEY_UPDATED_AT + " TEXT" +")";
         db.execSQL(CREATE_LOGIN_TABLE);
@@ -64,9 +64,9 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         onCreate(db);
     }
     //funkcja do update'owania danych w SQLite
-    public void updateUser(String id, String steps, int points, int game,int level, String updated_at){
+    public void updateUser(String id, String steps, int points, int game,int poziom, String updated_at){
         SQLiteDatabase db = this.getWritableDatabase();
-        db.execSQL("UPDATE " + TABLE_USER +" SET " + KEY_STEPS + " = " + steps + "," + KEY_LEVEL + " = " + level + "," + KEY_POINTS + " = " + points + ","   + KEY_GAME + " = " + game + ","   + KEY_UPDATED_AT + " = '" + updated_at  + "' WHERE " + KEY_ID + " = " + 1);
+        db.execSQL("UPDATE " + TABLE_USER +" SET " + KEY_STEPS + " = " + steps + "," + KEY_POZIOM + " = " + poziom + "," + KEY_POINTS + " = " + points + ","   + KEY_GAME + " = " + game + ","   + KEY_UPDATED_AT + " = '" + updated_at  + "' WHERE " + KEY_ID + " = " + 1);
         Log.d(TAG,"Sqlite data updated");
     }
 
@@ -74,7 +74,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
     /**
      Zapis danych użytkownika do bazy danych
      * */
-    public void addUser(String name, String email, String uid,String steps, String points,String game,String level, String created_at, String updated_at) {
+    public void addUser(String name, String email, String uid,String steps, String points,String game,String poziom, String created_at, String updated_at) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
@@ -84,7 +84,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         values.put(KEY_STEPS, steps); // Steps
         values.put(KEY_POINTS, points); // Points
         values.put(KEY_GAME, game); // Game
-        values.put(KEY_LEVEL, level); // Game
+        values.put(KEY_POZIOM, poziom); // Game
         values.put(KEY_CREATED_AT, created_at); // Created At
         values.put(KEY_UPDATED_AT, updated_at); // Updated At
 
@@ -113,7 +113,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
             user.put("steps", cursor.getString(4));
             user.put("points", cursor.getString(5));
             user.put("game", cursor.getString(6));
-            user.put("level", cursor.getString(7));
+            user.put("poziom", cursor.getString(7));
             user.put("created_at", cursor.getString(8));
             user.put("updated_at", cursor.getString(9));
         }

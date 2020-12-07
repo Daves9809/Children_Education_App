@@ -12,9 +12,9 @@ $response = array("error" => FALSE);
 	$updated_at = $_POST['updated_at'];
 	$points = $_POST['points'];
 	$game = $_POST['game'];
-	$level = $_POST['level'];
+	$poziom = $_POST['poziom'];
 
-if($db->updateUserSteps($email, $steps, $updated_at,$points,$game,$level)){
+if($db->updateUserSteps($email, $steps, $updated_at,$points,$game,$poziom)){
 	$response["msg"] = "Dane wyslane";
     echo json_encode($response);
 }else{

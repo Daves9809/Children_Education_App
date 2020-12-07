@@ -94,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
                 String steps;
                 String points = user.get("points");
                 String updated_at = user.get("updated_at");
-                String level = user.get("level");
+                String poziom = user.get("poziom");
 
                 if(!updated_at.equals(today())){ // jeśli dzień się zmienił zerujemy gry i kroki
 
@@ -110,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
 
                         } else{
                             Intent intent = new Intent(MainActivity.this, QuestionActivity.class);
-                            intent.putExtra("level",level);
+                            intent.putExtra("poziom",poziom);
                             startActivity(intent);
                             finish();
                             Log.d("mainActivity:","2 "+ updated_at + " " + today());
@@ -123,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
 
                     if(game.equals("null")){
                         Intent intent = new Intent(MainActivity.this, QuestionActivity.class);
-                        intent.putExtra("level",level);
+                        intent.putExtra("poziom",poziom);
                         startActivity(intent);
                         finish();
                         Log.d("mainActivity:","4 "+ updated_at + " " + today() + " 00:00:00");

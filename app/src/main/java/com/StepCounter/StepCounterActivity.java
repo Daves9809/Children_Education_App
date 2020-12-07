@@ -3,7 +3,6 @@ package com.StepCounter;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
-import com.LoginAndRegistration.Activity.LoginActivity;
 import com.Main.MainActivity;
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -16,7 +15,6 @@ import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
@@ -62,7 +60,7 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
     private int game;
     private String email;
     private String uid;
-    private String level;
+    private String poziom;
 
 
     @SuppressLint("CommitPrefEdits")
@@ -90,7 +88,7 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
         HashMap<String, String> user = db.getUserDetails();
         email = user.get("email");
         uid = user.get("uid");
-        level = user.get("level");
+        poziom = user.get("poziom");
 
         Log.e(TAG,"EMAIL: " + email);
         Log.e(TAG,"uid: " + uid);
@@ -109,7 +107,7 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
         btnSend.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View view) {
-                updateStepsIntoMySql(email,convertStepsToString(),level,uid);
+                updateStepsIntoMySql(email,convertStepsToString(), poziom,uid);
             }
 
         });
@@ -178,9 +176,9 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
         if (todaySteps == 0) {
             savePreferences(today(), 1); // zapisujemy dane, key- data dzisiejszego dnia, value - liczba krokow dzisiaj
         }
-        else if(todaySteps == Integer.parseInt(level) *10){
+        else if(todaySteps == Integer.parseInt(poziom) *10){
             savePreferences(today(), 10);
-            updateStepsIntoMySql(email,String.valueOf(10),level,uid);
+            updateStepsIntoMySql(email,String.valueOf(10), poziom,uid);
             editor.clear().commit();
             Intent intent = new Intent(StepCounterActivity.this, MainActivity.class);
             intent.putExtra("game",4);
@@ -220,7 +218,7 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
     }
 
     // funkcja do aktualizowania krokow w MySQL
-    private void updateStepsIntoMySql(final String email, final String steps,final String level, final String id) { // trzeba konwertowac inta steps do stringa
+    private void updateStepsIntoMySql(final String email, final String steps,final String poziom, final String id) { // trzeba konwertowac inta steps do stringa
         // Tag używany do anulowania żądania
         String tag_string_req = "req_update";
         showDialog();
@@ -231,9 +229,9 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
             // funkcja odbierająca odpowiedz
             @Override
             public void onResponse(String response) {
-                Log.d(TAG, "Update Response: " + response + " Steps = " + steps + " Points= " + appScore+ " Game= " + game + " Level= " + level + " today()= " + today()); // Dane dotyczące aktualizowania w Logcat'ie
+                Log.d(TAG, "Update Response: " + response + " Steps = " + steps + " Points= " + appScore+ " Game= " + game + " Poziom= " + poziom + " today()= " + today()); // Dane dotyczące aktualizowania w Logcat'ie
 
-                db.updateUser(id, steps,appScore,game,Integer.parseInt(level),today());
+                db.updateUser(id, steps,appScore,game,Integer.parseInt(poziom),today());
                 hideDialog();
 
             }
@@ -258,7 +256,7 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
                 params.put("updated_at",today());
                 params.put("points",String.valueOf(appScore));
                 params.put("game", String.valueOf(game));
-                params.put("level",level);
+                params.put("poziom",poziom);
 
                 return params;
             }
@@ -299,8 +297,8 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
                         String points = user.getString("points");
                         String game = user.getString("game");
                         if(updated_at.equals(today() + " 00:00:00")) {
-                            if(!steps.equals("null") && Integer.parseInt(steps) < (Integer.parseInt(level) *10)) {
-                                db.updateUser(id, steps, Integer.parseInt(points), Integer.parseInt(game),Integer.parseInt(level),today());
+                            if(!steps.equals("null") && Integer.parseInt(steps) < (Integer.parseInt(poziom) *10)) {
+                                db.updateUser(id, steps, Integer.parseInt(points), Integer.parseInt(game),Integer.parseInt(poziom),today());
                                 savePreferences(today(), Integer.parseInt(steps));
                                 Log.w(TAG,"1");
                             }
