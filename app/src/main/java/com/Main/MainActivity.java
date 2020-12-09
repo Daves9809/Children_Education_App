@@ -3,6 +3,7 @@ package com.Main;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
+import android.content.IntentFilter;
 import android.os.Bundle;
 
 import java.lang.reflect.Method;
@@ -91,10 +92,11 @@ public class MainActivity extends AppCompatActivity {
                 // pobieranie danych użytkownika z lokalnej bazy danych
                 HashMap<String, String> user = db.getUserDetails();
                 String game;
-                String steps;
+                String steps = user.get("steps");
                 String points = user.get("points");
                 String updated_at = user.get("updated_at");
                 String poziom = user.get("poziom");
+                Log.d("TODAY",today());
 
                 if(!updated_at.equals(today())){ // jeśli dzień się zmienił zerujemy gry i kroki
 
@@ -103,7 +105,6 @@ public class MainActivity extends AppCompatActivity {
 
                         if(Integer.parseInt(game) >= 3){
                             Intent intent = new Intent(MainActivity.this, StepCounterActivity.class);
-                            intent.putExtra("updated_at",updated_at);
                             startActivity(intent);
                             finish();
                             Log.d("mainActivity:","1 "+ updated_at + " " + today());
@@ -127,7 +128,13 @@ public class MainActivity extends AppCompatActivity {
                         startActivity(intent);
                         finish();
                         Log.d("mainActivity:","4 "+ updated_at + " " + today() + " 00:00:00");
-                    } else{
+                    }
+                    else if(Integer.parseInt(game) == 4 && Integer.parseInt(steps) < 10){
+                        Intent intent = new Intent(MainActivity.this, StepCounterActivity.class);
+                        startActivity(intent);
+                        finish();
+                    }
+                    else{
                         Log.d("mainActivity:","5 "+ updated_at + " " + today());
                         Toast.makeText(getApplicationContext(), "Wykonałeś wszystkie zadania, wróc ponownie jutro!", Toast.LENGTH_LONG).show();
                     }
@@ -157,18 +164,6 @@ public class MainActivity extends AppCompatActivity {
 
         Stetho.initializeWithDefaults(this);
     }
-    public static void showDebugDBAddressLogToast(Context context) {
-        if (BuildConfig.DEBUG) {
-            try {
-                Class<?> debugDB = Class.forName("com.amitshekhar.DebugDB");
-                Method getAddressLog = debugDB.getMethod("getAddressLog");
-                Object value = getAddressLog.invoke(null);
-                Toast.makeText(context, (String) value, Toast.LENGTH_LONG).show();
-            } catch (Exception ignore) {
-
-            }
-        }
-    }
 
     /**
      * Wylogowywanie użytkownika. Operacja ta ustawi flagę isLoggedIn na false, a Shared
@@ -186,6 +181,6 @@ public class MainActivity extends AppCompatActivity {
     }
     public String today() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        return sdf.format(Calendar.getInstance().getTime());
+        return sdf.format(Calendar.getInstance().getTime())+ " 00:00:00";
     }
 }

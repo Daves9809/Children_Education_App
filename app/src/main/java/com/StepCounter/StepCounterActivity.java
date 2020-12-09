@@ -61,6 +61,7 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
     private String email;
     private String uid;
     private String poziom;
+    private String basicPoints;
 
 
     @SuppressLint("CommitPrefEdits")
@@ -89,6 +90,7 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
         email = user.get("email");
         uid = user.get("uid");
         poziom = user.get("poziom");
+        basicPoints = user.get("points"); // punkty bazowe użytkownika
 
         Log.e(TAG,"EMAIL: " + email);
         Log.e(TAG,"uid: " + uid);
@@ -111,7 +113,7 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
             }
 
         });
-        getStepsFromMySql(email,uid); // jednorazowe pobranie danych(kroki, gra, punkty) z MySql po przejsciu do tej aktywnosci
+        getStepsFromMySql(email,uid,poziom,String.valueOf(appScore)); // jednorazowe pobranie danych(kroki, gra, punkty) z MySql po przejsciu do tej aktywnosci
     }
     private void initializeVariables(){
         mHandler = new Handler();
@@ -138,6 +140,8 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
 
     @Override
     public void onDestroy() {
+        updateStepsIntoMySql(email,convertStepsToString(), poziom,uid);
+        editor.clear().commit();
         mSensorManager.unregisterListener(this);
         super.onDestroy();
     }
@@ -158,6 +162,7 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
 
     @Override
     protected void onPause() {
+        updateStepsIntoMySql(email,convertStepsToString(), poziom,uid);
         mSensorManager.unregisterListener(this);
         super.onPause();
     }
@@ -179,7 +184,6 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
         else if(todaySteps == Integer.parseInt(poziom) *10){
             savePreferences(today(), 10);
             updateStepsIntoMySql(email,String.valueOf(10), poziom,uid);
-            editor.clear().commit();
             Intent intent = new Intent(StepCounterActivity.this, MainActivity.class);
             intent.putExtra("game",4);
             startActivity(intent);
@@ -212,16 +216,11 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
 
     }
 
-    public String today() {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        return sdf.format(Calendar.getInstance().getTime());
-    }
-
     // funkcja do aktualizowania krokow w MySQL
     private void updateStepsIntoMySql(final String email, final String steps,final String poziom, final String id) { // trzeba konwertowac inta steps do stringa
         // Tag używany do anulowania żądania
         String tag_string_req = "req_update";
-        showDialog();
+//        showDialog();
 
         StringRequest strReq = new StringRequest(Request.Method.POST, // zapytanie do bazy danych pod adresem AppConfig.URL_LOGIN
                 AppConfig.URL_SEND_DATA, new Response.Listener<String>() { // stworzenie obiektu sluchacza odpowiedzi
@@ -232,7 +231,7 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
                 Log.d(TAG, "Update Response: " + response + " Steps = " + steps + " Points= " + appScore+ " Game= " + game + " Poziom= " + poziom + " today()= " + today()); // Dane dotyczące aktualizowania w Logcat'ie
 
                 db.updateUser(id, steps,appScore,game,Integer.parseInt(poziom),today());
-                hideDialog();
+//                hideDialog();
 
             }
         }, new Response.ErrorListener() { // utworzenie instancji obiektu Response.ErrorListener()
@@ -242,7 +241,7 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
                 Log.e(TAG, "Update Error: " + error.getMessage());
                 Toast.makeText(getApplicationContext(),
                         error.getMessage(), Toast.LENGTH_LONG).show();
-                hideDialog();
+//                hideDialog();
             }
         })
         {
@@ -267,13 +266,13 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
         // Dodanie zapytania do kolejki zapytań
         AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
     }
-    private void getStepsFromMySql(final String email,final String id){
+    private void getStepsFromMySql(final String email, final String id, final String basicPoziom, final String basicPoints){
         final int stepss =0;
         // Tag używany do anulowania żądania
         String tag_string_req = "req_getSteps";
 
         pDialog.setMessage("Getting data ..");
-        showDialog();
+//        showDialog();
 
         StringRequest strReq = new StringRequest(Request.Method.POST, // zapytanie do bazy danych pod adresem AppConfig.URL_LOGIN
                 AppConfig.URL_GET_STEPS, new Response.Listener<String>() { // stworzenie obiektu sluchacza odpowiedzi
@@ -283,7 +282,7 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
             @Override
             public void onResponse(String response) {
                 Log.d(TAG, "GetSteps Response: " + response); // Dane dotyczące aktualizowania w Logcat'ie
-                hideDialog();
+//                hideDialog();
                 try {
                     JSONObject jObj = new JSONObject(response);
                     boolean error = jObj.getBoolean("error");
@@ -296,14 +295,14 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
                         String updated_at = user.getString("updated_at");
                         String points = user.getString("points");
                         String game = user.getString("game");
-                        if(updated_at.equals(today() + " 00:00:00")) {
+                        if(updated_at.equals(today())) {
                             if(!steps.equals("null") && Integer.parseInt(steps) < (Integer.parseInt(poziom) *10)) {
                                 db.updateUser(id, steps, Integer.parseInt(points), Integer.parseInt(game),Integer.parseInt(poziom),today());
                                 savePreferences(today(), Integer.parseInt(steps));
                                 Log.w(TAG,"1");
                             }
                             else if(steps.equals("null")){ // kiedy konto jest nowe
-                                db.updateUser(id, "0", 0, 0,1,today());
+                                db.updateUser(id, "0", Integer.parseInt(basicPoints), 4,Integer.parseInt(basicPoziom),today());
                                 savePreferences(today(), 0);
                                 Log.w(TAG,"2");
                             }
@@ -334,7 +333,7 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
                 Log.e(TAG, "GetSteps Error: " + error.getMessage());
                 Toast.makeText(getApplicationContext(),
                         error.getMessage(), Toast.LENGTH_LONG).show();
-                hideDialog();
+//                hideDialog();
             }
         }) {
 
@@ -354,6 +353,10 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
 
     }
 
+    public String today() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        return sdf.format(Calendar.getInstance().getTime()) + " 00:00:00";
+    }
 
 
     private void showDialog() {
