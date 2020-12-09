@@ -62,7 +62,8 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
     private String uid;
     private String poziom;
     private String basicPoints;
-
+    private int levelToSend;
+    private int pointsToSend = 0;
 
     @SuppressLint("CommitPrefEdits")
     @Override
@@ -92,11 +93,6 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
         poziom = user.get("poziom");
         basicPoints = user.get("points"); // punkty bazowe użytkownika
 
-        Log.e(TAG,"EMAIL: " + email);
-        Log.e(TAG,"uid: " + uid);
-
-
-
         btnButton.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View view) {
@@ -104,7 +100,6 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
             }
 
         });
-
 
         btnSend.setOnClickListener(new View.OnClickListener() {
 
@@ -162,7 +157,6 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
 
     @Override
     protected void onPause() {
-        updateStepsIntoMySql(email,convertStepsToString(), poziom,uid);
         mSensorManager.unregisterListener(this);
         super.onPause();
     }
@@ -183,7 +177,7 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
         }
         else if(todaySteps == Integer.parseInt(poziom) *10){
             savePreferences(today(), 10);
-            updateStepsIntoMySql(email,String.valueOf(10), poziom,uid);
+            updateStepsIntoMySql(email,String.valueOf(Integer.parseInt(poziom) *10), poziom,uid);
             Intent intent = new Intent(StepCounterActivity.this, MainActivity.class);
             intent.putExtra("game",4);
             startActivity(intent);
@@ -229,8 +223,36 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
             @Override
             public void onResponse(String response) {
                 Log.d(TAG, "Update Response: " + response + " Steps = " + steps + " Points= " + appScore+ " Game= " + game + " Poziom= " + poziom + " today()= " + today()); // Dane dotyczące aktualizowania w Logcat'ie
+                if(!basicPoints.equals("null")){
+                    if((Integer.parseInt(steps) <= Integer.parseInt(poziom) * 10) && (Integer.parseInt(basicPoints)  + appScore >= Integer.parseInt(poziom) * 10)){
+                            db.updateUser(id, steps, (Integer.parseInt(basicPoints) + appScore - Integer.parseInt(poziom) * 10), game, Integer.parseInt(poziom) + 1, today()); // zwiekszamy poziom i zerujemy punkty
+                            Log.e(TAG, "1");
+                            levelToSend = Integer.parseInt(poziom) +1;
+                            pointsToSend = Integer.parseInt(basicPoints) + appScore - Integer.parseInt(poziom) * 10;
+                        }
+                        else{
+                            db.updateUser(id, steps, Integer.parseInt(basicPoints) + appScore, game, Integer.parseInt(poziom), today());
+                            Log.e(TAG, "2");
+                            levelToSend = Integer.parseInt(poziom);
+                            pointsToSend = Integer.parseInt(basicPoints) + appScore;
+                        }
+                }
+                else{
+                    if((Integer.parseInt(steps) <= Integer.parseInt(poziom) * 10) && (appScore >= Integer.parseInt(poziom) * 10)) {
+                        db.updateUser(id, steps, (appScore - Integer.parseInt(poziom) * 10), game, Integer.parseInt(poziom) + 1, today());
+                        Log.e(TAG, "3");
+                        levelToSend = Integer.parseInt(poziom) +1;
+                        pointsToSend = appScore - Integer.parseInt(poziom) * 10;
+                        Log.d(TAG + "points to send: ",String.valueOf(pointsToSend));
+                    }
+                    else {
+                        db.updateUser(id, steps, appScore, game, Integer.parseInt(poziom), today());
+                        Log.e(TAG, "4");
+                        levelToSend = Integer.parseInt(poziom);
+                        pointsToSend = appScore;
+                    }
+                }
 
-                db.updateUser(id, steps,appScore,game,Integer.parseInt(poziom),today());
 //                hideDialog();
 
             }
@@ -253,9 +275,9 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
                 params.put("email", email);
                 params.put("steps", steps);
                 params.put("updated_at",today());
-                params.put("points",String.valueOf(appScore));
+                params.put("points",String.valueOf(pointsToSend));
                 params.put("game", String.valueOf(game));
-                params.put("poziom",poziom);
+                params.put("poziom",String.valueOf(levelToSend));
 
                 return params;
             }
@@ -302,7 +324,7 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
                                 Log.w(TAG,"1");
                             }
                             else if(steps.equals("null")){ // kiedy konto jest nowe
-                                db.updateUser(id, "0", Integer.parseInt(basicPoints), 4,Integer.parseInt(basicPoziom),today());
+                                db.updateUser(id, "0", 0, 4,Integer.parseInt(basicPoziom),today());
                                 savePreferences(today(), 0);
                                 Log.w(TAG,"2");
                             }

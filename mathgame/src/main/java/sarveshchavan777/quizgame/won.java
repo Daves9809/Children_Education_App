@@ -36,6 +36,7 @@ public class won extends Activity {
                     intent.putExtra("appScore",y);
                     intent.putExtra("poziom",poziom);
                     startActivity(intent);
+                    finish();
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
                 }

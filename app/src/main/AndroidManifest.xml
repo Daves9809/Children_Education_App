@@ -32,7 +32,7 @@
         <activity
             android:name="com.quizgame.QuestionActivityy" />
         <activity
-            android:name="com.quizgame.ResultActivity" />
+            android:name="com.quizgame.ResultActivityy" />
         <activity
             android:name="com.quizgame.wonn" />
         <activity

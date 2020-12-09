@@ -21,6 +21,7 @@ public class QuestionActivity extends Activity {
     List<Question> quesList;
     int score = 0;
     int qid = 0;
+    Boolean isEnd= false;
     String poziom;
 
 
@@ -97,13 +98,13 @@ public class QuestionActivity extends Activity {
             score++;
             scored.setText("Score : " + score);
         } else {
-
+            Log.d("ELSE","1");
 
 
             Intent intent = new Intent(QuestionActivity.this,
                     ResultActivity.class);
 
-
+            isEnd = true;
             Bundle b = new Bundle();
             b.putInt("score", score);
             b.putString("poziom",poziom);
@@ -111,13 +112,13 @@ public class QuestionActivity extends Activity {
             startActivity(intent);
             finish();
         }
-        if (qid < 5) {
+        if (qid <= 4 ) {
 
 
             currentQ = quesList.get(qid);
             setQuestionView();
-        } else {
-
+        } else if(!isEnd){
+            Log.d("ELSE","2");
 
             Intent intent = new Intent(QuestionActivity.this,won.class);
             Bundle b = new Bundle();
