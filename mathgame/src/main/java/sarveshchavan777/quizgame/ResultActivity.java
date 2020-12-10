@@ -24,7 +24,7 @@ public class ResultActivity extends Activity {
         score = b.getInt("score");
         poziom = b.getString("poziom");
 
-        textResult.setText("Wrong answer sorry!! Your points are " + " " + score);
+        textResult.setText("Zła odpowiedź!! Twoje punkty " + " = " + score);
 
     }
 

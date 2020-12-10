@@ -4,33 +4,36 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@android:color/holo_purple">
+    android:background="#D79FF3">
 
     <TextView
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:text="YOU WON CONGRATS"
+        android:layout_height="wrap_content"
+        android:text="Brawo, ukończyłeś 1 quiz!"
         android:textAlignment="center"
         android:textColor="#ffffff"
-        android:textSize="30dp" />
+        android:textSize="30dp"
+        android:layout_weight="1"/>
 
     <ImageView
         android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:src="@drawable/congrats" />
+        android:layout_height="wrap_content"
+        android:src="@drawable/applause_2" />
 
     <TextView
         android:id="@+id/congo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="SCORE"
+        android:text="Punkty:"
         android:textAlignment="center"
         android:textColor="#ffffff"
-        android:textSize="20dp" />
+        android:textSize="20dp"
+        android:layout_weight="1"/>
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/btnNextIntent"
         android:layout_gravity="center"
-        android:text="Next Game"/>
+        android:text="Dalej"
+        />
 </LinearLayout>

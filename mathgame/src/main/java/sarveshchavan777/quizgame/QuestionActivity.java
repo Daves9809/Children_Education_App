@@ -28,7 +28,7 @@ public class QuestionActivity extends Activity {
     Question currentQ;
     TextView txtQuestion, times, scored;
     Button button1, button2, button3;
-
+    QuizHelper db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,7 +45,7 @@ public class QuestionActivity extends Activity {
             poziom = extras.getString("poziom");
         }
 
-        QuizHelper db = new QuizHelper(this,poziom);
+        db = new QuizHelper(this,poziom);
         quesList = db.getAllQuestions();
         currentQ = quesList.get(qid);
 
@@ -111,6 +111,7 @@ public class QuestionActivity extends Activity {
             intent.putExtras(b);
             startActivity(intent);
             finish();
+            db.deleteDatabase();
         }
         if (qid <= 4 ) {
 
@@ -127,6 +128,7 @@ public class QuestionActivity extends Activity {
             intent.putExtras(b);
             startActivity(intent);
             finish();
+            db.deleteDatabase();
         }
 
 
@@ -171,7 +173,6 @@ public class QuestionActivity extends Activity {
 
     private void setQuestionView() {
 
-        // the method which will put all things together
         txtQuestion.setText(currentQ.getQUESTION());
         button1.setText(currentQ.getOPTA());
         button2.setText(currentQ.getOPTB());

@@ -24,7 +24,7 @@ public class won extends Activity {
         Bundle b = getIntent().getExtras();
         final int y = b.getInt("score");
         final String poziom = b.getString("poziom");
-        tv.setText("FINAL SCORE:" + y);
+        tv.setText("Zebrane punkty:" + y);
         btn.setOnClickListener(new View.OnClickListener() {
 
             @Override

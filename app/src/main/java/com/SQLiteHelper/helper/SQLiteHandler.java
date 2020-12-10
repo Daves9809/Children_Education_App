@@ -63,7 +63,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         // Ponowne utworzenie aktualnej tabeli
         onCreate(db);
     }
-    //funkcja do update'owania danych w SQLite
+    // funkcja do update'owania danych w SQLite
     public void updateUser(String id, String steps, int basicPoints, int game,int poziom, String updated_at){
         SQLiteDatabase db = this.getWritableDatabase();
         db.execSQL("UPDATE " + TABLE_USER +" SET " + KEY_STEPS + " = " + steps + "," + KEY_POZIOM + " = " + poziom + "," + KEY_POINTS + " = " + basicPoints + ","   + KEY_GAME + " = " + game + ","   + KEY_UPDATED_AT + " = '" + updated_at  + "' WHERE " + KEY_ID + " = " + 1);

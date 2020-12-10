@@ -1,4 +1,4 @@
-package com.LoginAndRegistration.Activity;
+package com.Activities;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -9,13 +9,14 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.ChildrenEducationApp.R;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.volley.Request.Method;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-import com.ChildrenEducationApp.R;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -27,78 +28,71 @@ import com.SQLiteHelper.app.AppConfig;
 import com.SQLiteHelper.app.AppController;
 import com.SQLiteHelper.helper.SQLiteHandler;
 import com.SQLiteHelper.helper.SessionManager;
-import com.Main.MainActivity;
 
-
-public class LoginActivity extends AppCompatActivity {
+public class RegisterActivity extends AppCompatActivity {
 
     //definiowanie zmiennych
-    private static final String TAG = LoginActivity.class.getSimpleName();
-    private Button btnLogin;
-    private Button btnLinkToRegister;
+    private static final String TAG = RegisterActivity.class.getSimpleName();
+    private EditText inputFullName;
     private EditText inputEmail;
     private EditText inputPassword;
     private ProgressDialog pDialog;
-    private SessionManager session;
     private SQLiteHandler db;
 
     //utworzenie widoku wraz z logiką
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
+        setContentView(R.layout.activity_register);
 
-        //przypisywanie zmiennym ich odpowiedników w przestrzeni login.xml
-        inputEmail =  findViewById(R.id.email);
-        inputPassword =  findViewById(R.id.password);
-        btnLogin =  findViewById(R.id.btnLogin);
-        btnLinkToRegister =  findViewById(R.id.btnLinkToRegisterScreen);
+        //przypisywanie zmiennym ich odpowiedników w przestrzeni activity_register.xml
+        inputFullName = findViewById(R.id.name);
+        inputEmail = findViewById(R.id.email);
+        inputPassword = findViewById(R.id.password);
+        Button btnRegister = findViewById(R.id.btnRegister);
+        Button btnLinkToLogin = findViewById(R.id.btnLinkToLoginScreen);
 
-        // Okno dialogowe pokazujące wskaźnik postępu, nie można go wyłączyć lub ominąć
+        // Okno dialogowe pokazujące wskaźnik postępu
         pDialog = new ProgressDialog(this);
         pDialog.setCancelable(false);
+
+        // Session manager, pozwala obsługiwać aplikację w zakresie logowania
+        SessionManager session = new SessionManager(getApplicationContext());
 
         // Lokalna baza danych SQLite
         db = new SQLiteHandler(getApplicationContext());
 
-        // Session manager, pozwala obsługiwać aplikację w zakresie logowania
-        session = new SessionManager(getApplicationContext());
-
         // Sprawdzamy czy użytkownik jest zalogowany
         if (session.isLoggedIn()) {
-            // Użytkownik jest zalogowany, zabierz go do MainActivity
-            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+            Intent intent = new Intent(RegisterActivity.this,
+                    MainActivity.class);
             startActivity(intent);
             finish();
         }
 
-        // Wykonuje się w momencie kliknięcia w przycisk btnLogin
-        btnLogin.setOnClickListener(new View.OnClickListener() {
 
+        btnRegister.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
+                String name = inputFullName.getText().toString().trim();
                 String email = inputEmail.getText().toString().trim();
                 String password = inputPassword.getText().toString().trim();
 
-                // Jesli dane są puste
-                if (!email.isEmpty() && !password.isEmpty()) {
-                    // logowanie
-                    checkLogin(email, password);
+                if (!name.isEmpty() && !email.isEmpty() && !password.isEmpty()) {
+                    registerUser(name, email, password);
                 } else {
-                    // poproś użytkownika o wypełnienie pustych przestrzeni
                     Toast.makeText(getApplicationContext(),
-                            "Please enter the credentials!", Toast.LENGTH_LONG)
+                            "Please enter your details!", Toast.LENGTH_LONG)
                             .show();
                 }
             }
-
         });
 
-        // W przypadku kliknięcia w przycisk btnLinkToRegister następuje przeniesienie do RegisterActivity
-        btnLinkToRegister.setOnClickListener(new View.OnClickListener() {
+        // Wykonuje się w momencie kliknięcia w przycisk btnLogin
+        btnLinkToLogin.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View view) {
                 Intent i = new Intent(getApplicationContext(),
-                        RegisterActivity.class);
+                        LoginActivity.class);
                 startActivity(i);
                 finish();
             }
@@ -106,36 +100,30 @@ public class LoginActivity extends AppCompatActivity {
 
     }
 
-    /**
-     Funkcja sprawdzająca poprawność danych w MySql oraz jednoczesnie aktualizaujaca dane w SQLite
-     * */
-    private void checkLogin(final String email, final String password) {
-        // Tag używany do anulowania żądania
-        String tag_string_req = "req_login";
 
-        pDialog.setMessage("Logging in ...");
+    // Funkcja do przechowywani użytkownika w bazie danych MySql będzie wysyłac parametry(tag,nazwa,
+    private void registerUser(final String name, final String email,
+                              final String password) {
+
+        String tag_string_req = "req_register";
+
+        pDialog.setMessage("Registering ...");
         showDialog();
 
-        StringRequest strReq = new StringRequest(Method.POST, // zapytanie do bazy danych pod adresem AppConfig.URL_LOGIN
-                AppConfig.URL_LOGIN, new Response.Listener<String>() { // stworzenie obiektu sluchacza odpowiedzi
+        StringRequest strReq = new StringRequest(Method.POST,
+                AppConfig.URL_REGISTER, new Response.Listener<String>() {
 
-            // funkcja odbierająca odpowiedz od plikow php
             @Override
             public void onResponse(String response) {
-                Log.d(TAG, "Login Response: " + response); // Dane dotyczące logowania w Logcat'ie
+                Log.d(TAG, "Register Response: " + response);
                 hideDialog();
 
                 try {
                     JSONObject jObj = new JSONObject(response);
                     boolean error = jObj.getBoolean("error");
-
-                    // sprawdz błąd
-                    // jesli nie ma wykona się poniższa funkcja(użytkownik pomyślnie zalogowany)
                     if (!error) {
-                        // Utworzenie sesji Logowania
-                        session.setLogin(true);
-
-                        // Utworzenie zmiennych do przechowania danych w SQLite
+                        // Użytkownik pomyślnie zalogowany
+                        // Zapisywanie użytkownika w bazie danych SQLite
                         String uid = jObj.getString("uid");
 
                         JSONObject user = jObj.getJSONObject("user");
@@ -149,32 +137,35 @@ public class LoginActivity extends AppCompatActivity {
                                 .getString("created_at");
                         String updated_at = user
                                 .getString("updated_at");
-                        // Wstawianie wiersza w tabeli użytkowników
-                        db.addUser(name, email, uid, steps, points, game,poziom, created_at,updated_at);
 
-                        // Inicjacja MainActivity
-                        Intent intent = new Intent(LoginActivity.this,
-                                MainActivity.class);
+                        // Wstawianie wiersza w tabeli użytkowników
+                        db.addUser(name, email, uid, steps, points, game, poziom, created_at, updated_at);
+
+                        Toast.makeText(getApplicationContext(), "User successfully registered. Try login now!", Toast.LENGTH_LONG).show();
+
+                        // Inicjowanie LoginActivity
+                        Intent intent = new Intent(
+                                RegisterActivity.this,
+                                LoginActivity.class);
                         startActivity(intent);
                         finish();
                     } else {
-                        // Błąd w logowaniu. Pobierz błąd
+
+                        // W rejestracji wystąpił błąd. Wypisanie wiadomość błędu
                         String errorMsg = jObj.getString("error_msg");
                         Toast.makeText(getApplicationContext(),
                                 errorMsg, Toast.LENGTH_LONG).show();
                     }
                 } catch (JSONException e) {
-                    // JSON error
                     e.printStackTrace();
-                    Toast.makeText(getApplicationContext(), "Json error: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 }
 
             }
-        }, new Response.ErrorListener() { // utworzenie instancji obiektu Response.ErrorListener()
+        }, new Response.ErrorListener() {
 
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.e(TAG, "Login Error: " + error.getMessage());
+                Log.e(TAG, "Registration Error: " + error.getMessage());
                 Toast.makeText(getApplicationContext(),
                         error.getMessage(), Toast.LENGTH_LONG).show();
                 hideDialog();
@@ -183,8 +174,9 @@ public class LoginActivity extends AppCompatActivity {
 
             @Override
             protected Map<String, String> getParams() {
-                // Wysyłanie parametrów do adresu url logowania
+                // Wysyłanie parametrów do adresu url rejestracji
                 Map<String, String> params = new HashMap<>();
+                params.put("name", name);
                 params.put("email", email);
                 params.put("password", password);
 

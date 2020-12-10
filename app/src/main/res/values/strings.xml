@@ -14,10 +14,10 @@
     <string name="witaj">Witaj</string>
     <string name="btn_logout">WYLOGUJ</string>
     <string name="name">Fullname</string>
-    <string name="wybor">Wybierz jedną z poniższych opcji</string>
+    <string name="wybor">Wybierz jedną z poniższych opcji: </string>
     <string name="btn_play">GRAJ</string>
     <string name="btn_ustawienia">ustawienia</string>
-    <string name="btn_statystyki">statystyki</string>
+    <string name="btn_statystyki">statystyki i ranking</string>
     <string name="steps">STEPS:</string>
     <string name="reset">Reset</string>
     <string name="send_data">Send Data</string>

@@ -1,15 +1,18 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/rLayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent"
+    android:background="#FDFDFD"
+    >
 
     <LinearLayout
+        android:id="@+id/lLayout"
         android:layout_width="fill_parent"
         android:layout_height="match_parent"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
         android:gravity="center_horizontal"
-        android:orientation="vertical" >
+        android:orientation="vertical">
 
         <TextView
             android:layout_width="wrap_content"
@@ -28,33 +31,29 @@
             android:id="@+id/choose"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textAlignment="center"
             android:padding="10dp"
             android:text="@string/wybor"
             android:textSize="24sp" />
-        <Button
-            android:id="@+id/btnPlay"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dip"
-            android:background="#ea4c88"
-            android:text="@string/btn_play"
-            android:textColor="@color/white" />
+
+        <ImageView
+            android:id="@+id/btnPlafy"
+            android:layout_width="wrap_content"
+            android:layout_height="150dp"
+            android:src="@drawable/start_buttonn"
+            android:layout_margin="50dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:onClick="start"/>
         <Button
             android:id="@+id/btnInfo"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dip"
             android:background="@color/btn_statistics"
+            android:layout_marginTop="50dp"
             android:text="@string/btn_statystyki"
             android:textColor="@color/white" />
-        <Button
-            android:id="@+id/btnSettings"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dip"
-            android:background="@color/btn_settings"
-            android:text="@string/btn_ustawienia"
-            android:textColor="@color/white" />
+
 
 
 

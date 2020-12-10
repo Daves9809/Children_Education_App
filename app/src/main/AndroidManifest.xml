@@ -22,7 +22,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name="com.StepCounter.StepCounterActivity"
+        <activity android:name="com.Activities.StepCounterActivity"
             android:label="@string/step_counter"
             android:noHistory="true"
             />
@@ -43,17 +43,17 @@
             android:name="sarveshchavan777.quizgame.ResultActivity" />
 
         <activity
-            android:name="com.LoginAndRegistration.Activity.LoginActivity"
+            android:name="com.Activities.LoginActivity"
             android:label="Children Education App"
             android:launchMode="singleTop"
             android:windowSoftInputMode="adjustPan"/>
         <activity
-            android:name="com.LoginAndRegistration.Activity.RegisterActivity"
+            android:name="com.Activities.RegisterActivity"
             android:label="Children Education App"
             android:launchMode="singleTop"
             android:windowSoftInputMode="adjustPan" />
         <activity
-            android:name="com.Main.MainActivity"
+            android:name="com.Activities.MainActivity"
             android:label="Children Education App"
             android:launchMode="singleTop" >
             <intent-filter>

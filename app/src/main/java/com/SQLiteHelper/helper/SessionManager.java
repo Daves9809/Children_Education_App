@@ -15,10 +15,9 @@ public class SessionManager {
     Editor editor;
     Context _context;
 
-    // Shared pref mode
     int PRIVATE_MODE = 0;
 
-    // Shared preferences nazwa pliku
+    // nazwa pliku
     private static final String PREF_NAME = "ChildrenAppLogin";
 
     private static final String KEY_IS_LOGGEDIN = "isLoggedIn";

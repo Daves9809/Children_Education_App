@@ -1,9 +1,8 @@
-package com.StepCounter;
+package com.Activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
-import com.Main.MainActivity;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -45,17 +44,15 @@ import com.SQLiteHelper.helper.SQLiteHandler;
 public class StepCounterActivity extends AppCompatActivity implements SensorEventListener {
 
     private static final String TAG = StepCounterActivity.class.getSimpleName();
-    private TextView textViewStepCounter, textViewStepDetector;
+    private TextView textViewStepCounter;
     private Button btnButton;
     private Button btnSend;
     private SensorManager mSensorManager;
     private Sensor countSensor;
-    private int milestoneStep;
     private SharedPreferences mPreferences;
     private SharedPreferences.Editor editor;
     private SQLiteHandler db;
     private ProgressDialog pDialog;
-    private Handler mHandler;
     private int appScore;
     private int game;
     private String email;
@@ -64,16 +61,17 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
     private String basicPoints;
     private int levelToSend;
     private int pointsToSend = 0;
+    private boolean zeroSteps;
 
     @SuppressLint("CommitPrefEdits")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_step_counter);
-        // permission to app working propely also on android 29+
+        // pozwolenie na poprawne działanie aplikacji również na Androidzie 29+
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACTIVITY_RECOGNITION) == PackageManager.PERMISSION_DENIED) {
-            //ask for permission
+            // zapytanie o pozwolenie
             requestPermissions(new String[]{Manifest.permission.ACTIVITY_RECOGNITION}, 1);
         }
         initializeVariables();
@@ -82,16 +80,15 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
         if (extras != null && extras.getInt("game") != 0) {
             appScore = extras.getInt("appScore");
             game = extras.getInt("game");
-            //The key argument here must match that used in the other activity
         }
         db = new SQLiteHandler(getApplicationContext());
 
-        // pobieranie danych użytkownika z lokalnej bazy danych
+        // pobieranie potrzebnych danych użytkownika z lokalnej bazy danych
         HashMap<String, String> user = db.getUserDetails();
         email = user.get("email");
         uid = user.get("uid");
         poziom = user.get("poziom");
-        basicPoints = user.get("points"); // punkty bazowe użytkownika
+        basicPoints = user.get("points");
 
         btnButton.setOnClickListener(new View.OnClickListener() {
 
@@ -104,19 +101,19 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
         btnSend.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View view) {
-                updateStepsIntoMySql(email,convertStepsToString(), poziom,uid);
+                updateData(email,convertStepsToString(), poziom,uid);
             }
 
         });
-        getStepsFromMySql(email,uid,poziom,String.valueOf(appScore)); // jednorazowe pobranie danych(kroki, gra, punkty) z MySql po przejsciu do tej aktywnosci
+        getDataFromMySql(email,uid,poziom); // pobieranie danych użytkownika z bazy danych MySql
     }
     private void initializeVariables(){
-        mHandler = new Handler();
+        Handler mHandler = new Handler();
 
         textViewStepCounter =  findViewById(R.id.textViewStepCounter);
-        textViewStepDetector =  findViewById(R.id.textViewStepDetector);
         btnButton =  findViewById(R.id.btnButton);
         btnSend =  findViewById(R.id.btnSend);
+        zeroSteps = false;
 
         pDialog = new ProgressDialog(this);
         pDialog.setCancelable(false);
@@ -125,17 +122,15 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
 
         countSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
 
-        // Lokalna baza danych SQLite
         db = new SQLiteHandler(getApplicationContext());
 
-        // SharedPreferences
         mPreferences = getPreferences(MODE_PRIVATE);
         editor = mPreferences.edit();
     }
 
     @Override
     public void onDestroy() {
-        updateStepsIntoMySql(email,convertStepsToString(), poziom,uid);
+        updateData(email,convertStepsToString(), poziom,uid);
         editor.clear().commit();
         mSensorManager.unregisterListener(this);
         super.onDestroy();
@@ -145,7 +140,6 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
     protected void onResume() {
         super.onResume();
         if (countSensor != null) {
-
             mSensorManager.registerListener(this, countSensor, SensorManager.SENSOR_DELAY_UI);
             Toast.makeText(this, "Sensor found", Toast.LENGTH_SHORT).show();
         } else {
@@ -154,6 +148,7 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
 
 
     }
+
 
     @Override
     protected void onPause() {
@@ -165,19 +160,22 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
     @Override
     public void onSensorChanged(SensorEvent event) {
         int additionStep = 0;
-        int totalStepCountSinceReboot = (int) event.values[0]; // kroki zrobione od początku zainstalowania apliakcji
-        textViewStepDetector.setText(today()); // tutaj test
-        int todaySteps = getPreferences(today()); // przypisywanie zapisanej zmiennej do codziennych krokow
-        milestoneStep = totalStepCountSinceReboot - 1;
+        int totalStepCountSinceReboot = (int) event.values[0]; // kroki od ostatniego resetu
+        int todaySteps = getPreferences(today());
+        int milestoneStep = totalStepCountSinceReboot - 1;
 
 
 
         if (todaySteps == 0) {
-            savePreferences(today(), 1); // zapisujemy dane, key- data dzisiejszego dnia, value - liczba krokow dzisiaj
+            if(!zeroSteps){
+                savePreferences(today(), 0); // zapisywanie danych jako klucz-wartość z tego dnia
+                zeroSteps = true;
+            } else
+                savePreferences(today(), 1);
         }
         else if(todaySteps == Integer.parseInt(poziom) *10){
             savePreferences(today(), 10);
-            updateStepsIntoMySql(email,String.valueOf(Integer.parseInt(poziom) *10), poziom,uid);
+            updateData(email,String.valueOf(Integer.parseInt(poziom) *10), poziom,uid);
             Intent intent = new Intent(StepCounterActivity.this, MainActivity.class);
             intent.putExtra("game",4);
             startActivity(intent);
@@ -186,9 +184,9 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
         }
         else {
             additionStep = totalStepCountSinceReboot - milestoneStep;
-            savePreferences(today(), todaySteps + additionStep); // zapisujemy dane, key- data dzisiejszego dnia, value - liczba krokow dzisiaj
+            savePreferences(today(), todaySteps + additionStep);
         }
-        textViewStepCounter.setText(String.valueOf(getPreferences(today()))); // wyswietlenie wyniku na ekranie
+        textViewStepCounter.setText(String.valueOf(getPreferences(today()))); // wyświetlenie wyniku na ekranie
     }
 
 
@@ -210,29 +208,26 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
 
     }
 
-    // funkcja do aktualizowania krokow w MySQL
-    private void updateStepsIntoMySql(final String email, final String steps,final String poziom, final String id) { // trzeba konwertowac inta steps do stringa
+    // Aktualizowanie danych w mySql i SqLite
+    private void updateData(final String email, final String steps, final String poziom, final String id) { // trzeba konwertowac inta steps do stringa
         // Tag używany do anulowania żądania
         String tag_string_req = "req_update";
-//        showDialog();
 
         StringRequest strReq = new StringRequest(Request.Method.POST, // zapytanie do bazy danych pod adresem AppConfig.URL_LOGIN
                 AppConfig.URL_SEND_DATA, new Response.Listener<String>() { // stworzenie obiektu sluchacza odpowiedzi
 
-            // funkcja odbierająca odpowiedz
+            // method which gets response
             @Override
             public void onResponse(String response) {
-                Log.d(TAG, "Update Response: " + response + " Steps = " + steps + " Points= " + appScore+ " Game= " + game + " Poziom= " + poziom + " today()= " + today()); // Dane dotyczące aktualizowania w Logcat'ie
+                Log.d(TAG, "Update Response: " + response + " Steps = " + steps + " Points= " + appScore+ " Game= " + game + " Poziom= " + poziom + " today()= " + today());
                 if(!basicPoints.equals("null")){
                     if((Integer.parseInt(steps) <= Integer.parseInt(poziom) * 10) && (Integer.parseInt(basicPoints)  + appScore >= Integer.parseInt(poziom) * 10)){
-                            db.updateUser(id, steps, (Integer.parseInt(basicPoints) + appScore - Integer.parseInt(poziom) * 10), game, Integer.parseInt(poziom) + 1, today()); // zwiekszamy poziom i zerujemy punkty
-                            Log.e(TAG, "1");
+                            db.updateUser(id, steps, (Integer.parseInt(basicPoints) + appScore - Integer.parseInt(poziom) * 10), game, Integer.parseInt(poziom) + 1, today());
                             levelToSend = Integer.parseInt(poziom) +1;
                             pointsToSend = Integer.parseInt(basicPoints) + appScore - Integer.parseInt(poziom) * 10;
                         }
                         else{
                             db.updateUser(id, steps, Integer.parseInt(basicPoints) + appScore, game, Integer.parseInt(poziom), today());
-                            Log.e(TAG, "2");
                             levelToSend = Integer.parseInt(poziom);
                             pointsToSend = Integer.parseInt(basicPoints) + appScore;
                         }
@@ -240,20 +235,16 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
                 else{
                     if((Integer.parseInt(steps) <= Integer.parseInt(poziom) * 10) && (appScore >= Integer.parseInt(poziom) * 10)) {
                         db.updateUser(id, steps, (appScore - Integer.parseInt(poziom) * 10), game, Integer.parseInt(poziom) + 1, today());
-                        Log.e(TAG, "3");
                         levelToSend = Integer.parseInt(poziom) +1;
                         pointsToSend = appScore - Integer.parseInt(poziom) * 10;
                         Log.d(TAG + "points to send: ",String.valueOf(pointsToSend));
                     }
                     else {
                         db.updateUser(id, steps, appScore, game, Integer.parseInt(poziom), today());
-                        Log.e(TAG, "4");
                         levelToSend = Integer.parseInt(poziom);
                         pointsToSend = appScore;
                     }
                 }
-
-//                hideDialog();
 
             }
         }, new Response.ErrorListener() { // utworzenie instancji obiektu Response.ErrorListener()
@@ -263,7 +254,6 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
                 Log.e(TAG, "Update Error: " + error.getMessage());
                 Toast.makeText(getApplicationContext(),
                         error.getMessage(), Toast.LENGTH_LONG).show();
-//                hideDialog();
             }
         })
         {
@@ -288,13 +278,10 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
         // Dodanie zapytania do kolejki zapytań
         AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
     }
-    private void getStepsFromMySql(final String email, final String id, final String basicPoziom, final String basicPoints){
-        final int stepss =0;
-        // Tag używany do anulowania żądania
+    private void getDataFromMySql(final String email, final String id, final String basicPoziom){
         String tag_string_req = "req_getSteps";
 
         pDialog.setMessage("Getting data ..");
-//        showDialog();
 
         StringRequest strReq = new StringRequest(Request.Method.POST, // zapytanie do bazy danych pod adresem AppConfig.URL_LOGIN
                 AppConfig.URL_GET_STEPS, new Response.Listener<String>() { // stworzenie obiektu sluchacza odpowiedzi
@@ -304,13 +291,10 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
             @Override
             public void onResponse(String response) {
                 Log.d(TAG, "GetSteps Response: " + response); // Dane dotyczące aktualizowania w Logcat'ie
-//                hideDialog();
                 try {
                     JSONObject jObj = new JSONObject(response);
                     boolean error = jObj.getBoolean("error");
 
-                    // sprawdz błąd
-                    // jesli nie ma wykona się poniższa funkcja(użytkownik pomyślnie zalogowany)
 
                         JSONObject user = jObj.getJSONObject("user");
                         String steps = user.getString("steps");
@@ -355,7 +339,6 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
                 Log.e(TAG, "GetSteps Error: " + error.getMessage());
                 Toast.makeText(getApplicationContext(),
                         error.getMessage(), Toast.LENGTH_LONG).show();
-//                hideDialog();
             }
         }) {
 
@@ -380,16 +363,6 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
         return sdf.format(Calendar.getInstance().getTime()) + " 00:00:00";
     }
 
-
-    private void showDialog() {
-        if (!pDialog.isShowing())
-            pDialog.show();
-    }
-
-    private void hideDialog() {
-        if (pDialog.isShowing())
-            pDialog.dismiss();
-    }
 
     private String convertStepsToString(){
         int steps = getPreferences(today());

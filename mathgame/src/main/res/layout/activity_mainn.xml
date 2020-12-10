@@ -1,26 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:ads="http://schemas.android.com/apk/res-auto"
     android:id="@+id/relatively"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FF5733"
+    android:background="#EDB158"
     android:orientation="vertical"
     android:weightSum="1">
 
-    <LinearLayout
-        android:id="@+id/linearLayout1"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="0.90"
-        android:orientation="vertical"
-        android:weightSum="1">
+
 
         <LinearLayout
             android:id="@+id/linearLayout11"
             android:layout_width="match_parent"
             android:layout_height="51dp"
-            android:background="#C0392B"
+            android:background="#CC4032"
             android:orientation="vertical"
             android:weightSum="1">
 
@@ -129,4 +122,4 @@
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
-</LinearLayout>
+

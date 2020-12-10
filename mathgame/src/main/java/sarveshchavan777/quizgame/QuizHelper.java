@@ -26,7 +26,7 @@ public class QuizHelper extends SQLiteOpenHelper {
     Context context;
     private static final int DATABASE_VERSION = 13;
 
-    private static final String DATABASE_NAME = "mathsone";
+    private static final String DATABASE_NAME = "mathgame";
     private static final String TABLE_QUEST = "quest";
     private static final String KEY_ID = "qid";
     private static final String KEY_QUES = "question";
@@ -53,7 +53,6 @@ public class QuizHelper extends SQLiteOpenHelper {
                 + KEY_OPTB + " TEXT, " + KEY_OPTC + " TEXT)";
         db.execSQL(sql);
         addQuestion();
-        // db.close();
     }
 
     private void addQuestion() {
@@ -64,10 +63,10 @@ public class QuizHelper extends SQLiteOpenHelper {
         try{
             JSONObject quizObject = new JSONObject(quizJson); // tworzymy JSON object ze Stringa
             quizes = new ArrayList<>(); // lista przechowujaca pytania i odpowiedzi
-            JSONArray quizesCategoriesArray = quizObject.getJSONArray("categories"); // creating variable of categories
-            String category = null; // varable initialization
+            JSONArray quizesCategoriesArray = quizObject.getJSONArray("categories");
+            String category = null; // inicjalizacja zmiennej
             for (int i = 0; i < quizesCategoriesArray.length(); i++) { // iterating over categories
-                if(quizesCategoriesArray.getJSONObject(i).getString("category").equals(level)) { // jesli category = 1
+                if(quizesCategoriesArray.getJSONObject(i).getString("category").equals(level)) {
                     JSONArray quizesJsonArray = quizesCategoriesArray.getJSONObject(i).getJSONArray("quizes");
                     for (int j = 0; j < quizesJsonArray.length(); j++) {   // iterujemy po quizach
                         String question = quizesJsonArray.getJSONObject(j).getString("question"); // pobieranie pytania
@@ -168,6 +167,9 @@ public class QuizHelper extends SQLiteOpenHelper {
         }
 
         return quesList;
+    }
+    public void deleteDatabase(){
+        context.deleteDatabase(DATABASE_NAME);
     }
 
 

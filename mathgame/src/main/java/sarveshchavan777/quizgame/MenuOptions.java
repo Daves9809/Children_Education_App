@@ -6,9 +6,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
-/**
- * Created by LENOVO on 12/12/2016.
- */
 
 public class MenuOptions extends Activity {
     Button b1;
