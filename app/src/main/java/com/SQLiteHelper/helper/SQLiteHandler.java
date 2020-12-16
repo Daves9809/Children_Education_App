@@ -33,8 +33,8 @@ public class SQLiteHandler extends SQLiteOpenHelper {
     private static final String KEY_GAME = "game";
     private static final String KEY_POZIOM = "poziom";
 
-    public SQLiteHandler(Context context) {
-        super(context, DATABASE_NAME, null, DATABASE_VERSION);
+    public SQLiteHandler(Context context, String NAME_OF_DATABASE) {
+        super(context, NAME_OF_DATABASE, null, DATABASE_VERSION);
     }
 
     // Utworzenie tablic

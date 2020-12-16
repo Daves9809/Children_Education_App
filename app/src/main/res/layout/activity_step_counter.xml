@@ -1,54 +1,176 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context="com.Activities.StepCounterActivity">
 
-    <LinearLayout
-        android:layout_width="wrap_content"
+    <TextView
+        android:id="@+id/stepsToDo"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
+        android:background="#2196F3"
+        android:text="@string/steps"
+        android:textAlignment="center"
+        android:textSize="24sp" />
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:src="@drawable/footstepss" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:background="#2196F3"
         android:orientation="vertical">
 
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/steps"
-            android:textSize="24sp"
-            android:layout_gravity="center_horizontal"
-            />
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/aktualny_postep"
+            android:textAlignment="center"
+            android:textSize="24sp" />
 
-        <TextView
-            android:id="@+id/textViewStepCounter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text=""
-            android:textSize="30sp"
-            android:layout_gravity="center_horizontal"/>
-        <TextView
-            android:id="@+id/textViewStepDetector"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text=""
-            />
 
     </LinearLayout>
 
-    <Button
-        android:id="@+id/btnButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/reset"
-        android:layout_centerHorizontal="true"/>
-    <Button
-        android:id="@+id/btnSend"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/send_data"
-        android:layout_centerHorizontal="true"
-        android:layout_alignParentBottom="true"/>
+    <LinearLayout
 
-</RelativeLayout>
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="8dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:paddingRight="5dp"
+                android:text="0%" />
+
+            <ProgressBar
+                android:id="@+id/progress_bar"
+                style="@style/RectanglerDeterminateProgressBar"
+                android:layout_width="285dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:max="100"
+                android:progress="10" />
+
+            <TextView
+                android:id="@+id/maxSteps"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="100%" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingBottom="5dp">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@color/light_green" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=" - Kroki zrobione dzisiaj" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@color/light_red" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=" - Pozostałe kroki" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Zrobione kroki = "
+                        android:textSize="24sp"
+                        />
+                    <TextView
+                        android:id="@+id/textViewStepCounter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="24sp"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Przebyty dystans = "
+                        android:textSize="24sp"
+                        />
+                    <TextView
+                        android:id="@+id/textViewDistance"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="24sp"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="24sp"
+                        android:text="[m]"/>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+</LinearLayout>

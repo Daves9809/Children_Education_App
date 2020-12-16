@@ -60,7 +60,7 @@ public class RegisterActivity extends AppCompatActivity {
         SessionManager session = new SessionManager(getApplicationContext());
 
         // Lokalna baza danych SQLite
-        db = new SQLiteHandler(getApplicationContext());
+        db = new SQLiteHandler(getApplicationContext(),"android_user");
 
         // Sprawdzamy czy użytkownik jest zalogowany
         if (session.isLoggedIn()) {
@@ -81,13 +81,12 @@ public class RegisterActivity extends AppCompatActivity {
                     registerUser(name, email, password);
                 } else {
                     Toast.makeText(getApplicationContext(),
-                            "Please enter your details!", Toast.LENGTH_LONG)
+                            "Proszę wypełnić puste pola!", Toast.LENGTH_LONG)
                             .show();
                 }
             }
         });
 
-        // Wykonuje się w momencie kliknięcia w przycisk btnLogin
         btnLinkToLogin.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View view) {
@@ -124,22 +123,7 @@ public class RegisterActivity extends AppCompatActivity {
                     if (!error) {
                         // Użytkownik pomyślnie zalogowany
                         // Zapisywanie użytkownika w bazie danych SQLite
-                        String uid = jObj.getString("uid");
-
-                        JSONObject user = jObj.getJSONObject("user");
-                        String name = user.getString("name");
-                        String email = user.getString("email");
-                        String steps = user.getString("steps");
-                        String points = user.getString("points");
-                        String game = user.getString("game");
-                        String poziom = user.getString("poziom");
-                        String created_at = user
-                                .getString("created_at");
-                        String updated_at = user
-                                .getString("updated_at");
-
-                        // Wstawianie wiersza w tabeli użytkowników
-                        db.addUser(name, email, uid, steps, points, game, poziom, created_at, updated_at);
+                        addUser(jObj);
 
                         Toast.makeText(getApplicationContext(), "User successfully registered. Try login now!", Toast.LENGTH_LONG).show();
 
@@ -150,7 +134,6 @@ public class RegisterActivity extends AppCompatActivity {
                         startActivity(intent);
                         finish();
                     } else {
-
                         // W rejestracji wystąpił błąd. Wypisanie wiadomość błędu
                         String errorMsg = jObj.getString("error_msg");
                         Toast.makeText(getApplicationContext(),
@@ -159,7 +142,6 @@ public class RegisterActivity extends AppCompatActivity {
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-
             }
         }, new Response.ErrorListener() {
 
@@ -187,6 +169,25 @@ public class RegisterActivity extends AppCompatActivity {
 
         // Dodanie zapytania do kolejki zapytań
         AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
+    }
+    private void addUser(JSONObject jObj) throws JSONException {
+        String uid = jObj.getString("uid");
+
+        JSONObject user = jObj.getJSONObject("user");
+        String name = user.getString("name");
+        String email = user.getString("email");
+        String steps = user.getString("steps");
+        String points = user.getString("points");
+        String game = user.getString("game");
+        String poziom = user.getString("poziom");
+        String created_at = user
+                .getString("created_at");
+        String updated_at = user
+                .getString("updated_at");
+
+        // Wstawianie wiersza w tabeli użytkowników
+        db.addUser(name, email, uid, steps, points, game, poziom, created_at, updated_at);
+
     }
 
     private void showDialog() {

@@ -19,12 +19,13 @@ public class ResultActivity extends Activity {
 
         TextView textResult = (TextView) findViewById(R.id.textResult);
 
+
         Bundle b = getIntent().getExtras();
 
         score = b.getInt("score");
         poziom = b.getString("poziom");
 
-        textResult.setText("Zła odpowiedź!! Twoje punkty " + " = " + score);
+        textResult.setText("Zła odpowiedź!! Zebrane punkty " + " = " + score);
 
     }
 

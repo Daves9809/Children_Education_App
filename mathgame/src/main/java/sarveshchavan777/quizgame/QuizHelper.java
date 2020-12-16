@@ -42,10 +42,14 @@ public class QuizHelper extends SQLiteOpenHelper {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
         this.context = context;
         this.level = level;
+
+        Log.d("QuizHelper ", "konstruktor");
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
+
+        Log.d("QuizHelper ", "onCreate");
         dbase = db;
         String sql = "CREATE TABLE IF NOT EXISTS " + TABLE_QUEST + " ( "
                 + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + KEY_QUES
@@ -56,7 +60,8 @@ public class QuizHelper extends SQLiteOpenHelper {
     }
 
     private void addQuestion() {
-        Log.d("QuizHelper","addQuestion");
+
+        Log.d("QuizHelper ", "addQuestion1");
         InputStream is = context.getResources().openRawResource(R.raw.quizmath);
         String quizJson = getQuizJsonResource(is); // pobranie JSONA w formie Stringa
         ArrayList<Question> quizes = null;
@@ -134,6 +139,9 @@ public class QuizHelper extends SQLiteOpenHelper {
     }
     public void addQuestion(ArrayList<Question> questions) {
 
+        Log.d("QuizHelper ", "addQuestion");
+        if(questions.isEmpty())
+            Log.d("QuizHelper ", "questionsAreEmpty");
         for (Question question : questions) {
             ContentValues values = new ContentValues();
             values.put(KEY_QUES, question.getQUESTION());
@@ -148,6 +156,7 @@ public class QuizHelper extends SQLiteOpenHelper {
     }
 
     public List<Question> getAllQuestions() {
+        Log.d("QuizHelper ", "getAllQuestions");
         List<Question> quesList = new ArrayList<Question>();
 
         String selectQuery = "SELECT  * FROM " + TABLE_QUEST;

@@ -47,6 +47,8 @@ public class QuestionActivity extends Activity {
 
         db = new QuizHelper(this,poziom);
         quesList = db.getAllQuestions();
+        if(quesList.isEmpty())
+            Log.d("QuestionActivity  ","quesList is empty");
         currentQ = quesList.get(qid);
 
 

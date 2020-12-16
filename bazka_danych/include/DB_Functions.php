@@ -92,7 +92,6 @@ class DB_Functions {
     }
 	
 	public function getUserPointsByEmail($email){
-		//$stmt = $this->conn->prepare("SELECT steps FROM users WHERE email = ?");
 		$stmt = $this->conn->prepare("SELECT * FROM users WHERE email = ?");
 		$stmt->bind_param("s", $email);
 		if ($stmt->execute()) {
@@ -102,6 +101,26 @@ class DB_Functions {
 		}else{
 			return NULL;
 		}
+	}
+	public function getAllUsers(){
+		$stmt = $this->conn->prepare("SELECT name, poziom, points FROM users ");
+		$stmt ->execute();
+		$stmt ->bind_results("$name, $poziom, $points");
+
+		$users = array();
+
+		while($stmt ->fetch()){
+			
+			$temp = array();
+			
+			$temp['name'] = $name;
+			$temp['poziom'] = $poziom;
+			$temp['points'] = $points;
+			
+			array_push($users, $temp);
+		}
+
+		echo json_encode($users);
 	}
 	
 	

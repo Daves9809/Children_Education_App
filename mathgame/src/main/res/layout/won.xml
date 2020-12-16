@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#D79FF3">
+    android:background="#2196F3">
 
     <TextView
         android:layout_width="match_parent"
@@ -12,7 +12,7 @@
         android:text="Brawo, ukończyłeś 1 quiz!"
         android:textAlignment="center"
         android:textColor="#ffffff"
-        android:textSize="30dp"
+        android:textSize="30sp"
         android:layout_weight="1"/>
 
     <ImageView
@@ -24,7 +24,7 @@
         android:id="@+id/congo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Punkty:"
+        android:text="Zebrane Punkty:"
         android:textAlignment="center"
         android:textColor="#ffffff"
         android:textSize="20dp"
@@ -34,6 +34,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/btnNextIntent"
         android:layout_gravity="center"
-        android:text="Dalej"
+        android:layout_marginBottom="10dp"
+        android:text="Kolejna gra"
         />
 </LinearLayout>

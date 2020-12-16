@@ -8,28 +8,36 @@
 
     <TextView
         android:id="@+id/textResult"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
+        android:textAlignment="center"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginTop="50dp"
-        android:text="Wrong answer sorry!!"
+        android:text="Zła odpowiedź!!"
         android:textColor="#000000"
         android:textSize="30sp"
 
         android:textStyle="bold" />
 
+    <TextView
+        android:id="@+id/tvPoints"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAlignment="center"
+        android:textColor="#000000"
+        android:textSize="20dp"
+        android:layout_weight="1"/>
+
     <Button
         android:id="@+id/btn"
-        android:layout_width="@dimen/box_size"
-        android:layout_height="@dimen/box_size"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_marginTop="100dp"
-        android:background="@drawable/mybutton"
         android:onClick="playagain"
-        android:padding="20dp"
-        android:text="Dalej"
+        android:layout_marginBottom="10dp"
+        android:text="Kolejna gra"
         android:textColor="#000000"
-        android:textSize="20sp" />
+        android:textSize="16sp" />
 
 
 </LinearLayout>

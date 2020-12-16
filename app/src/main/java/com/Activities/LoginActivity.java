@@ -41,7 +41,7 @@ public class LoginActivity extends AppCompatActivity {
     private SessionManager session;
     private SQLiteHandler db;
 
-    //utworzenie widoku wraz z logiką
+    //utworzenie widoku wraz z logikąTAG
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,7 +58,7 @@ public class LoginActivity extends AppCompatActivity {
         pDialog.setCancelable(false);
 
         // Lokalna baza danych SQLite
-        db = new SQLiteHandler(getApplicationContext());
+        db = new SQLiteHandler(getApplicationContext(),"android_user");
 
         // Session manager, pozwala obsługiwać aplikację w zakresie logowania
         session = new SessionManager(getApplicationContext());

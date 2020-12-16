@@ -25,6 +25,7 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -44,9 +45,8 @@ import com.SQLiteHelper.helper.SQLiteHandler;
 public class StepCounterActivity extends AppCompatActivity implements SensorEventListener {
 
     private static final String TAG = StepCounterActivity.class.getSimpleName();
-    private TextView textViewStepCounter;
-    private Button btnButton;
-    private Button btnSend;
+    private TextView tvStepCounter, tvStepsToDO,tvDistance;
+    ProgressBar progressBar;
     private SensorManager mSensorManager;
     private Sensor countSensor;
     private SharedPreferences mPreferences;
@@ -62,6 +62,7 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
     private int levelToSend;
     private int pointsToSend = 0;
     private boolean zeroSteps;
+    private int todaySteps;
 
     @SuppressLint("CommitPrefEdits")
     @Override
@@ -75,54 +76,43 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
             requestPermissions(new String[]{Manifest.permission.ACTIVITY_RECOGNITION}, 1);
         }
         initializeVariables();
-
-        Bundle extras = getIntent().getExtras();
-        if (extras != null && extras.getInt("game") != 0) {
-            appScore = extras.getInt("appScore");
-            game = extras.getInt("game");
-        }
-        db = new SQLiteHandler(getApplicationContext());
-
         // pobieranie potrzebnych danych użytkownika z lokalnej bazy danych
         HashMap<String, String> user = db.getUserDetails();
         email = user.get("email");
         uid = user.get("uid");
         poziom = user.get("poziom");
         basicPoints = user.get("points");
+        tvStepsToDO.setText(getString(R.string.dailySteps) + String.valueOf(Integer.parseInt(poziom) * 100));
 
-        btnButton.setOnClickListener(new View.OnClickListener() {
+        savePreferences("score",Integer.parseInt(basicPoints));
 
-            public void onClick(View view) {
-                editor.clear().apply();
-            }
+        Bundle extras = getIntent().getExtras();
+        if (extras != null && extras.getInt("game") != 0) {
+            appScore = extras.getInt("appScore");
+            game = extras.getInt("game");
+//            savePreferences("score",appScore+Integer.parseInt(basicPoints));
+        }
 
-        });
-
-        btnSend.setOnClickListener(new View.OnClickListener() {
-
-            public void onClick(View view) {
-                updateData(email,convertStepsToString(), poziom,uid);
-            }
-
-        });
-        getDataFromMySql(email,uid,poziom); // pobieranie danych użytkownika z bazy danych MySql
+        getDataFromMySql(email,uid,poziom);
     }
     private void initializeVariables(){
         Handler mHandler = new Handler();
 
-        textViewStepCounter =  findViewById(R.id.textViewStepCounter);
-        btnButton =  findViewById(R.id.btnButton);
-        btnSend =  findViewById(R.id.btnSend);
+        tvStepCounter =  findViewById(R.id.textViewStepCounter);
+        tvStepsToDO = findViewById(R.id.stepsToDo);
+        tvDistance = findViewById(R.id.textViewDistance);
         zeroSteps = false;
 
         pDialog = new ProgressDialog(this);
         pDialog.setCancelable(false);
 
+        progressBar = (ProgressBar) findViewById(R.id.progress_bar);
+
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 
         countSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
 
-        db = new SQLiteHandler(getApplicationContext());
+        db = new SQLiteHandler(getApplicationContext(),"android_user");
 
         mPreferences = getPreferences(MODE_PRIVATE);
         editor = mPreferences.edit();
@@ -130,9 +120,11 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
 
     @Override
     public void onDestroy() {
-        updateData(email,convertStepsToString(), poziom,uid);
-        editor.clear().commit();
-        mSensorManager.unregisterListener(this);
+        if(getPreferences(today()) >= Integer.parseInt(poziom)*100) {
+            Log.d(TAG," data cleared, sensor unregistered");
+            editor.clear().commit();
+            mSensorManager.unregisterListener(this);
+        }
         super.onDestroy();
     }
 
@@ -152,7 +144,10 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
 
     @Override
     protected void onPause() {
-        mSensorManager.unregisterListener(this);
+        if(getPreferences(today()) >= Integer.parseInt(poziom)*100) {
+            Log.d(TAG," data cleared, sensor unregistered");
+            mSensorManager.unregisterListener(this);
+        }
         super.onPause();
     }
 
@@ -161,7 +156,7 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
     public void onSensorChanged(SensorEvent event) {
         int additionStep = 0;
         int totalStepCountSinceReboot = (int) event.values[0]; // kroki od ostatniego resetu
-        int todaySteps = getPreferences(today());
+        todaySteps = getPreferences(today());
         int milestoneStep = totalStepCountSinceReboot - 1;
 
 
@@ -173,9 +168,9 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
             } else
                 savePreferences(today(), 1);
         }
-        else if(todaySteps == Integer.parseInt(poziom) *10){
-            savePreferences(today(), 10);
-            updateData(email,String.valueOf(Integer.parseInt(poziom) *10), poziom,uid);
+        else if(todaySteps == Integer.parseInt(poziom) *100){
+            savePreferences(today(), 100);
+            updateData(email,String.valueOf(Integer.parseInt(poziom) *100), poziom,uid);
             Intent intent = new Intent(StepCounterActivity.this, MainActivity.class);
             intent.putExtra("game",4);
             startActivity(intent);
@@ -186,7 +181,9 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
             additionStep = totalStepCountSinceReboot - milestoneStep;
             savePreferences(today(), todaySteps + additionStep);
         }
-        textViewStepCounter.setText(String.valueOf(getPreferences(today()))); // wyświetlenie wyniku na ekranie
+        tvDistance.setText(String.valueOf(countDistance(getPreferences(today()))));
+        updateProgressBar(progressBar ,poziom,getPreferences(today())); // update'owanie pasku progresu
+        tvStepCounter.setText(String.valueOf(getPreferences(today()))); // wyświetlenie wyniku na ekranie
     }
 
 
@@ -221,7 +218,7 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
             public void onResponse(String response) {
                 Log.d(TAG, "Update Response: " + response + " Steps = " + steps + " Points= " + appScore+ " Game= " + game + " Poziom= " + poziom + " today()= " + today());
                 if(!basicPoints.equals("null")){
-                    if((Integer.parseInt(steps) <= Integer.parseInt(poziom) * 10) && (Integer.parseInt(basicPoints)  + appScore >= Integer.parseInt(poziom) * 10)){
+                    if((Integer.parseInt(steps) <= Integer.parseInt(poziom) * 100) && (Integer.parseInt(basicPoints)  + appScore >= Integer.parseInt(poziom) * 10)){
                             db.updateUser(id, steps, (Integer.parseInt(basicPoints) + appScore - Integer.parseInt(poziom) * 10), game, Integer.parseInt(poziom) + 1, today());
                             levelToSend = Integer.parseInt(poziom) +1;
                             pointsToSend = Integer.parseInt(basicPoints) + appScore - Integer.parseInt(poziom) * 10;
@@ -233,7 +230,7 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
                         }
                 }
                 else{
-                    if((Integer.parseInt(steps) <= Integer.parseInt(poziom) * 10) && (appScore >= Integer.parseInt(poziom) * 10)) {
+                    if((Integer.parseInt(steps) <= Integer.parseInt(poziom) * 100) && (appScore >= Integer.parseInt(poziom) * 10)) {
                         db.updateUser(id, steps, (appScore - Integer.parseInt(poziom) * 10), game, Integer.parseInt(poziom) + 1, today());
                         levelToSend = Integer.parseInt(poziom) +1;
                         pointsToSend = appScore - Integer.parseInt(poziom) * 10;
@@ -278,6 +275,7 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
         // Dodanie zapytania do kolejki zapytań
         AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
     }
+
     private void getDataFromMySql(final String email, final String id, final String basicPoziom){
         String tag_string_req = "req_getSteps";
 
@@ -367,6 +365,21 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
     private String convertStepsToString(){
         int steps = getPreferences(today());
         return String.valueOf(steps);
+    }
+
+    private void updateProgressBar(ProgressBar progressBar, String poziom, int steps) {
+        double doubleSteps = steps;
+        progressBar.setMax(Integer.parseInt(poziom)*100);
+        if (!poziom.equals("null")) {
+            progressBar.setProgress(steps);
+        } else {
+            progressBar.setProgress(0);
+        }
+    }
+
+    private double countDistance(int steps){
+        double doubleSteps = steps;
+        return (doubleSteps/1250)*1000;
     }
 
 }

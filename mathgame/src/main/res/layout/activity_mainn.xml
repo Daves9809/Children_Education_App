@@ -3,7 +3,6 @@
     android:id="@+id/relatively"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#EDB158"
     android:orientation="vertical"
     android:weightSum="1">
 
@@ -13,7 +12,7 @@
             android:id="@+id/linearLayout11"
             android:layout_width="match_parent"
             android:layout_height="51dp"
-            android:background="#CC4032"
+            android:background="#2196F3"
             android:orientation="vertical"
             android:weightSum="1">
 
@@ -74,7 +73,7 @@
                     android:layout_gravity="center"
                     android:layout_marginTop="5dp"
                     android:gravity="center"
-                    android:text="Question 15-15  = ?"
+                    android:text="Question 15-10  = ?"
                     android:textColor="#000"
                     android:textSize="35.0sp"
                     android:textStyle="bold" />
@@ -115,7 +114,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:background="@drawable/mybutton"
-                    android:text="15"
+                    android:text="5"
                     android:textColor="#000000"
                     android:textSize="25dp"
                     />

@@ -12,4 +12,7 @@ public class AppConfig {
 
     // Adres Url pliku php do wysylania danych na serwer
     public static String URL_GET_STEPS = "http://dawid.server031806.nazwa.pl/getStepsFromMySql.php";
+
+    // Adres Url pliku php do pobrania danych użytkowników z serwera
+    public static String URL_GET_ALL_USERS = "http://dawid.server031806.nazwa.pl/getAllUsers.php";
 }
