@@ -22,6 +22,8 @@ public class SessionManager {
 
     private static final String KEY_IS_LOGGEDIN = "isLoggedIn";
 
+    private static final String KEY_LEVEL_UP = "isLevelUp";
+
     public SessionManager(Context context) {
         this._context = context;
         pref = _context.getSharedPreferences(PREF_NAME, PRIVATE_MODE);
@@ -39,7 +41,19 @@ public class SessionManager {
         Log.d(TAG, "User login session modified!");
     }
 
+    public void
+    setLevelUp(boolean isLevelUp) {
+
+        editor.putBoolean(KEY_LEVEL_UP, isLevelUp);
+
+        editor.commit();
+        Log.d(TAG, "User leveledUp");
+    }
+
     public boolean isLoggedIn(){
         return pref.getBoolean(KEY_IS_LOGGEDIN, false);
+    }
+    public boolean isLevelUp(){
+        return pref.getBoolean(KEY_LEVEL_UP, false);
     }
 }

@@ -3,6 +3,7 @@ package com.Activities;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
+import com.SQLiteHelper.helper.SessionManager;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -23,8 +24,6 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -45,7 +44,7 @@ import com.SQLiteHelper.helper.SQLiteHandler;
 public class StepCounterActivity extends AppCompatActivity implements SensorEventListener {
 
     private static final String TAG = StepCounterActivity.class.getSimpleName();
-    private TextView tvStepCounter, tvStepsToDO,tvDistance;
+    private TextView tvStepCounter, tvStepsToDO, tvDistance;
     ProgressBar progressBar;
     private SensorManager mSensorManager;
     private Sensor countSensor;
@@ -56,6 +55,7 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
     private int appScore;
     private int game;
     private String email;
+    private String name;
     private String uid;
     private String poziom;
     private String basicPoints;
@@ -63,6 +63,8 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
     private int pointsToSend = 0;
     private boolean zeroSteps;
     private int todaySteps;
+    private int bPoints;
+    private SessionManager session;
 
     @SuppressLint("CommitPrefEdits")
     @Override
@@ -76,29 +78,61 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
             requestPermissions(new String[]{Manifest.permission.ACTIVITY_RECOGNITION}, 1);
         }
         initializeVariables();
+        session = new SessionManager(getApplicationContext());
         // pobieranie potrzebnych danych użytkownika z lokalnej bazy danych
         HashMap<String, String> user = db.getUserDetails();
         email = user.get("email");
+        name = user.get("name");
         uid = user.get("uid");
         poziom = user.get("poziom");
-        basicPoints = user.get("points");
-        tvStepsToDO.setText(getString(R.string.dailySteps) + String.valueOf(Integer.parseInt(poziom) * 100));
+        basicPoints = user.get("points"); // to będzie miało wartość w przypadku gdy użytkownik nie jest nowy
+        if (basicPoints.equals("null"))
+            bPoints = 0;
+        else
+            bPoints = Integer.parseInt(basicPoints);
 
-        savePreferences("score",Integer.parseInt(basicPoints));
+        tvStepsToDO.setText(getString(R.string.dailySteps) + String.valueOf(Integer.parseInt(poziom) * 10));
+
 
         Bundle extras = getIntent().getExtras();
         if (extras != null && extras.getInt("game") != 0) {
             appScore = extras.getInt("appScore");
             game = extras.getInt("game");
-//            savePreferences("score",appScore+Integer.parseInt(basicPoints));
         }
 
-        getDataFromMySql(email,uid,poziom);
+        if (getPreferencesString("name").equals("null")) { // w przypadku zresetowania lub nowego konta
+            Log.d("test", "1");
+            Toast.makeText(getApplicationContext(), "nie wyłączono apki", Toast.LENGTH_SHORT).show();
+            if (getPreferencesInt("pointss") == 0) { // czyli nastąpiło kasowanie na skutek przelogowania lub skonczenia aktywnosci
+                savePreferencesInt("pointss", bPoints + appScore);
+                savePreferences("poziom", poziom);
+            } else {
+                savePreferencesInt("pointss", appScore);
+                savePreferences("poziom", poziom);
+            }
+
+        } else if (getPreferencesString("name").equals(name)) { // nie nastąpiło przelogowanie, ale nastapilo wyjscie z aplikacji lub
+            Log.d("test", "2");
+            Toast.makeText(getApplicationContext(), "nie nastąpiło przelogowanie", Toast.LENGTH_SHORT).show();
+            if (getPreferencesInt("pointss") == 0) { // czyli nie nastąpiło kasowanie na skutek przelogowania lub wypełnienia zadania
+                savePreferencesInt("pointss", bPoints + appScore);
+                savePreferences("poziom", poziom);
+            }
+        } else if (!getPreferencesString("name").equals(name)) { // nastąpiło przelogowanie
+            Log.d("test", "3");
+            Toast.makeText(getApplicationContext(), "nastąpiło przelogowanie", Toast.LENGTH_SHORT).show();
+            editor.clear().commit(); // czyszczenie podręcznych danych
+            savePreferences("name",name);
+            savePreferencesInt("pointss", appScore);
+            savePreferences("poziom", poziom);
+        }
+
     }
-    private void initializeVariables(){
+
+    private void initializeVariables() {
         Handler mHandler = new Handler();
 
-        tvStepCounter =  findViewById(R.id.textViewStepCounter);
+        tvStepCounter = findViewById(R.id.textViewStepCounter);
         tvStepsToDO = findViewById(R.id.stepsToDo);
         tvDistance = findViewById(R.id.textViewDistance);
         zeroSteps = false;
@@ -112,7 +146,7 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
 
         countSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
 
-        db = new SQLiteHandler(getApplicationContext(),"android_user");
+        db = new SQLiteHandler(getApplicationContext(), "android_user");
 
         mPreferences = getPreferences(MODE_PRIVATE);
         editor = mPreferences.edit();
@@ -120,11 +154,17 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
 
     @Override
     public void onDestroy() {
-        if(getPreferences(today()) >= Integer.parseInt(poziom)*100) {
-            Log.d(TAG," data cleared, sensor unregistered");
+        if (getPreferencesInt(today()) >= Integer.parseInt(poziom) * 10) { // jesli uzytkownik zbierze wyznaczona liczbe punktow
+            Log.d(TAG, " data cleared, sensor unregistered");
             editor.clear().commit();
             mSensorManager.unregisterListener(this);
         }
+        else if (getPreferencesInt(today()) < Integer.parseInt(poziom) * 10) {
+            Log.d("smieszny update", "oj tak");
+            db.updateUser(uid, "0", 0, 4, 1, today());
+        }
+        savePreferences("name", name); // przy usunięciu aktywności zabezpieczenie przed przelogowaniem
+        mSensorManager.unregisterListener(this); // wyłączanie sensora
         super.onDestroy();
     }
 
@@ -144,8 +184,8 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
 
     @Override
     protected void onPause() {
-        if(getPreferences(today()) >= Integer.parseInt(poziom)*100) {
-            Log.d(TAG," data cleared, sensor unregistered");
+        if (getPreferencesInt(today()) >= Integer.parseInt(poziom) * 100) {
+            Log.d(TAG, " data cleared, sensor unregistered");
             mSensorManager.unregisterListener(this);
         }
         super.onPause();
@@ -155,38 +195,43 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
     @Override
     public void onSensorChanged(SensorEvent event) {
         int additionStep = 0;
-        int totalStepCountSinceReboot = (int) event.values[0]; // kroki od ostatniego resetu
-        todaySteps = getPreferences(today());
-        int milestoneStep = totalStepCountSinceReboot - 1;
+        int totalStepsCountSinceReboot = (int) event.values[0]; // kroki od ostatniego resetu
+        todaySteps = getPreferencesInt(today());
+        int milestoneStep = totalStepsCountSinceReboot - 1;
 
+        String level = getPreferencesString("poziom");
+        int points = getPreferencesInt("pointss");
 
 
         if (todaySteps == 0) {
-            if(!zeroSteps){
-                savePreferences(today(), 0); // zapisywanie danych jako klucz-wartość z tego dnia
+            if (!zeroSteps) {
+                savePreferencesInt(today(), 0); // zapisywanie danych jako klucz-wartość z tego dnia
                 zeroSteps = true;
             } else
-                savePreferences(today(), 1);
-        }
-        else if(todaySteps == Integer.parseInt(poziom) *100){
-            savePreferences(today(), 100);
-            updateData(email,String.valueOf(Integer.parseInt(poziom) *100), poziom,uid);
+                savePreferencesInt(today(), 1);
+        } else if (todaySteps >= Integer.parseInt(level) * 10) {
+            savePreferencesInt(today(), Integer.parseInt(level) * 10);
+            if (points >= Integer.parseInt(level) * 10) {
+                points = points - Integer.parseInt(level) * 10;
+                updateData(String.valueOf(Integer.parseInt(level) * 10), Integer.parseInt(level)+1, uid, points);
+                session.setLevelUp(true); // ustawiamy flage poniewaz level sie zwieksyl
+            }
+            else{
+                updateData(String.valueOf(Integer.parseInt(level) * 10), Integer.parseInt(level), uid, points);
+            }
             Intent intent = new Intent(StepCounterActivity.this, MainActivity.class);
-            intent.putExtra("game",4);
+            intent.putExtra("game", 4);
             startActivity(intent);
             finish();
             return;
+        } else {
+            additionStep = totalStepsCountSinceReboot - milestoneStep;
+            savePreferencesInt(today(), todaySteps + additionStep);
         }
-        else {
-            additionStep = totalStepCountSinceReboot - milestoneStep;
-            savePreferences(today(), todaySteps + additionStep);
-        }
-        tvDistance.setText(String.valueOf(countDistance(getPreferences(today()))));
-        updateProgressBar(progressBar ,poziom,getPreferences(today())); // update'owanie pasku progresu
-        tvStepCounter.setText(String.valueOf(getPreferences(today()))); // wyświetlenie wyniku na ekranie
+        tvDistance.setText(String.valueOf(countDistance(todaySteps)));
+        updateProgressBar(progressBar, level, getPreferencesInt(today())); // update'owanie pasku progresu
+        tvStepCounter.setText(String.valueOf(getPreferencesInt(today()))); // wyświetlenie wyniku na ekranie
     }
-
-
 
 
     @Override
@@ -194,21 +239,35 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
     }
 
 
-    private void savePreferences(String key, int value) {
-        Log.d("TAG","Preferences saved, steps = " + value);
+    private void savePreferencesInt(String key, int value) {
+        Log.d("TAG", "Preferences saved, steps = " + value);
         editor.putInt(key, value);
         editor.commit();
     }
 
-    private int getPreferences(String key) {
+    private void savePreferences(String key, String value) {
+        Log.d("TAG", "Preferences saved, name = " + value);
+        editor.putString(key, value);
+        editor.commit();
+    }
+
+    private int getPreferencesInt(String key) {
         return mPreferences.getInt(key, 0);
 
     }
 
+    private String getPreferencesString(String key) {
+        return mPreferences.getString(key, "null");
+
+    }
+
     // Aktualizowanie danych w mySql i SqLite
-    private void updateData(final String email, final String steps, final String poziom, final String id) { // trzeba konwertowac inta steps do stringa
+    private void updateData(final String steps, final int level, final String id, final int points) { // ta funkcja do poprawy
         // Tag używany do anulowania żądania
         String tag_string_req = "req_update";
+//        Log.d("UPDATE steps = ",steps);
+//        Log.d("UPDATE level = ",String.valueOf(level));
+//        Log.d("UPDATE points = ",String.valueOf(points));
 
         StringRequest strReq = new StringRequest(Request.Method.POST, // zapytanie do bazy danych pod adresem AppConfig.URL_LOGIN
                 AppConfig.URL_SEND_DATA, new Response.Listener<String>() { // stworzenie obiektu sluchacza odpowiedzi
@@ -216,32 +275,10 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
             // method which gets response
             @Override
             public void onResponse(String response) {
-                Log.d(TAG, "Update Response: " + response + " Steps = " + steps + " Points= " + appScore+ " Game= " + game + " Poziom= " + poziom + " today()= " + today());
-                if(!basicPoints.equals("null")){
-                    if((Integer.parseInt(steps) <= Integer.parseInt(poziom) * 100) && (Integer.parseInt(basicPoints)  + appScore >= Integer.parseInt(poziom) * 10)){
-                            db.updateUser(id, steps, (Integer.parseInt(basicPoints) + appScore - Integer.parseInt(poziom) * 10), game, Integer.parseInt(poziom) + 1, today());
-                            levelToSend = Integer.parseInt(poziom) +1;
-                            pointsToSend = Integer.parseInt(basicPoints) + appScore - Integer.parseInt(poziom) * 10;
-                        }
-                        else{
-                            db.updateUser(id, steps, Integer.parseInt(basicPoints) + appScore, game, Integer.parseInt(poziom), today());
-                            levelToSend = Integer.parseInt(poziom);
-                            pointsToSend = Integer.parseInt(basicPoints) + appScore;
-                        }
-                }
-                else{
-                    if((Integer.parseInt(steps) <= Integer.parseInt(poziom) * 100) && (appScore >= Integer.parseInt(poziom) * 10)) {
-                        db.updateUser(id, steps, (appScore - Integer.parseInt(poziom) * 10), game, Integer.parseInt(poziom) + 1, today());
-                        levelToSend = Integer.parseInt(poziom) +1;
-                        pointsToSend = appScore - Integer.parseInt(poziom) * 10;
-                        Log.d(TAG + "points to send: ",String.valueOf(pointsToSend));
-                    }
-                    else {
-                        db.updateUser(id, steps, appScore, game, Integer.parseInt(poziom), today());
-                        levelToSend = Integer.parseInt(poziom);
-                        pointsToSend = appScore;
-                    }
-                }
+
+                    db.updateUser(id, steps, points, 4, level, today());
+
+                Log.d(TAG, "Update Response: " + response + " Steps = " + steps + " Points= " + points + " Game= " + 4 + " Poziom= " + level + " today()= " + today());
 
             }
         }, new Response.ErrorListener() { // utworzenie instancji obiektu Response.ErrorListener()
@@ -252,8 +289,7 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
                 Toast.makeText(getApplicationContext(),
                         error.getMessage(), Toast.LENGTH_LONG).show();
             }
-        })
-        {
+        }) {
 
             @Override
             protected Map<String, String> getParams() {
@@ -261,10 +297,10 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
                 Map<String, String> params = new HashMap<>();
                 params.put("email", email);
                 params.put("steps", steps);
-                params.put("updated_at",today());
-                params.put("points",String.valueOf(pointsToSend));
-                params.put("game", String.valueOf(game));
-                params.put("poziom",String.valueOf(levelToSend));
+                params.put("updated_at", today());
+                params.put("points", String.valueOf(points));
+                params.put("game", String.valueOf(4));
+                params.put("poziom", String.valueOf(level));
 
                 return params;
             }
@@ -276,7 +312,7 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
         AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
     }
 
-    private void getDataFromMySql(final String email, final String id, final String basicPoziom){
+    private void getDataFromMySql(final String email, final String id, final String basicPoziom) {
         String tag_string_req = "req_getSteps";
 
         pDialog.setMessage("Getting data ..");
@@ -294,38 +330,35 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
                     boolean error = jObj.getBoolean("error");
 
 
-                        JSONObject user = jObj.getJSONObject("user");
-                        String steps = user.getString("steps");
-                        String updated_at = user.getString("updated_at");
-                        String points = user.getString("points");
-                        String game = user.getString("game");
-                        if(updated_at.equals(today())) {
-                            if(!steps.equals("null") && Integer.parseInt(steps) < (Integer.parseInt(poziom) *10)) {
-                                db.updateUser(id, steps, Integer.parseInt(points), Integer.parseInt(game),Integer.parseInt(poziom),today());
-                                savePreferences(today(), Integer.parseInt(steps));
-                                Log.w(TAG,"1");
-                            }
-                            else if(steps.equals("null")){ // kiedy konto jest nowe
-                                db.updateUser(id, "0", 0, 4,Integer.parseInt(basicPoziom),today());
-                                savePreferences(today(), 0);
-                                Log.w(TAG,"2");
-                            }
-                            else{
-                                Log.w(TAG,"3");
-                                Intent intent = new Intent(StepCounterActivity.this, MainActivity.class);
-                                intent.putExtra("game",4);
-                                startActivity(intent);
-                                finish();
-                            }
+                    JSONObject user = jObj.getJSONObject("user");
+                    String steps = user.getString("steps");
+                    String updated_at = user.getString("updated_at");
+                    String points = user.getString("points");
+                    String game = user.getString("game");
+                    if (updated_at.equals(today())) {
+                        if (!steps.equals("null") && Integer.parseInt(steps) < (Integer.parseInt(poziom) * 10)) {
+                            db.updateUser(id, steps, Integer.parseInt(points), Integer.parseInt(game), Integer.parseInt(poziom), today());
+                            savePreferencesInt(today(), Integer.parseInt(steps));
+                            Log.w(TAG, "1");
+                        } else if (steps.equals("null")) { // kiedy konto jest nowe
+                            db.updateUser(id, "0", 0, 4, Integer.parseInt(basicPoziom), today());
+                            savePreferencesInt(today(), 0);
+                            Log.w(TAG, "2");
+                        } else {
+                            Log.w(TAG, "3");
+                            Intent intent = new Intent(StepCounterActivity.this, MainActivity.class);
+                            intent.putExtra("game", 4);
+                            startActivity(intent);
+                            finish();
                         }
-                        else{
-                            Log.w(TAG,"4");
-                            Log.w("updated_at= ",updated_at);
-                            Log.w("today()= ",today());
-                            savePreferences(today(),0);
-                        }
+                    } else {
+                        Log.w(TAG, "4");
+                        Log.w("updated_at= ", updated_at);
+                        Log.w("today()= ", today());
+                        savePreferencesInt(today(), 0);
+                    }
 
-                    } catch (JSONException e) {
+                } catch (JSONException e) {
                     e.printStackTrace();
                 }
 
@@ -362,24 +395,24 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
     }
 
 
-    private String convertStepsToString(){
-        int steps = getPreferences(today());
+    private String convertStepsToString() {
+        int steps = getPreferencesInt(today());
         return String.valueOf(steps);
     }
 
-    private void updateProgressBar(ProgressBar progressBar, String poziom, int steps) {
+    private void updateProgressBar(ProgressBar progressBar, String level, int steps) {
         double doubleSteps = steps;
-        progressBar.setMax(Integer.parseInt(poziom)*100);
-        if (!poziom.equals("null")) {
+        progressBar.setMax(Integer.parseInt(level) * 10);
+        if (!level.equals("null")) {
             progressBar.setProgress(steps);
         } else {
             progressBar.setProgress(0);
         }
     }
 
-    private double countDistance(int steps){
+    private double countDistance(int steps) {
         double doubleSteps = steps;
-        return (doubleSteps/1250)*1000;
+        return (doubleSteps / 1250) * 1000;
     }
 
 }

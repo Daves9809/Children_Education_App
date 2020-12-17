@@ -58,7 +58,6 @@ public class MainActivity extends AppCompatActivity {
         // Definiowanie lokalnego programu obsługi bazy danych
         db = new SQLiteHandler(getApplicationContext(), "android_user");
 
-        // session manager
         session = new SessionManager(getApplicationContext());
 
         if (!session.isLoggedIn()) {
@@ -70,9 +69,7 @@ public class MainActivity extends AppCompatActivity {
         transformData();
         setDataOnDisplay();
 
-
-        if (poziom != null && punkty != null)
-            updateProgressBar(progressBar, poziom, punkty);
+        updateProgressBar(progressBar, poziom, punkty);
 
         // przycisk do wylogowania
         btnLogout.setOnClickListener(new View.OnClickListener() {
@@ -127,7 +124,9 @@ public class MainActivity extends AppCompatActivity {
         imie = user.get("name");
         Log.d("mainact", imie);
         poziom = user.get("poziom");
+        Log.d("mainact",poziom);
         punkty = user.get("points");
+        Log.d("mainact",punkty);
         data = user.get("created_at");
     }
 
@@ -166,10 +165,10 @@ public class MainActivity extends AppCompatActivity {
         String steps = user.get("steps");
         String updated_at = user.get("updated_at");
         String poziom = user.get("poziom");
-        Log.d("TODAY", today());
 
         if (!updated_at.equals(today())) { // jeśli dzień się zmienił zerujemy gry i kroki
 
+            session.setLevelUp(false); // jesli zmienia sie dzien zmieniamy flage
             game = "0";
             steps = "0"; // ??
 
@@ -177,28 +176,34 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(MainActivity.this, StepCounterActivity.class);
                 startActivity(intent);
                 finish();
+                Log.d(TAG,"ALALA 1");
 
             } else {
                 Intent intent = new Intent(MainActivity.this, QuestionActivity.class);
                 intent.putExtra("poziom", poziom);
                 startActivity(intent);
                 finish();
+                Log.d(TAG,"ALALA 2");
             }
 
 
         } else if (updated_at.equals(today())) { // jeśli dzień się nie zmienił kontynuujemy rozpoczęty proces
 
             game = user.get("game");
+            Log.d("game = ",game);
+            Log.d("stepsM = ",steps);
 
             if (game.equals("null")) {
                 Intent intent = new Intent(MainActivity.this, QuestionActivity.class);
                 intent.putExtra("poziom", poziom);
                 startActivity(intent);
                 finish();
-            } else if (Integer.parseInt(game) == 4 && Integer.parseInt(steps) < (Integer.parseInt(poziom)*100)) {
+                Log.d(TAG,"ALALA 3");
+            } else if (Integer.parseInt(game) == 4 && Integer.parseInt(steps) < (Integer.parseInt(poziom)*10) && !session.isLevelUp()) {
                 Intent intent = new Intent(MainActivity.this, StepCounterActivity.class);
                 startActivity(intent);
                 finish();
+                Log.d(TAG,"ALALA 4");
             } else {
                 Toast.makeText(getApplicationContext(), "Wykonałeś wszystkie zadania, wróc ponownie jutro!", Toast.LENGTH_LONG).show();
             }
