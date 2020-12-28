@@ -49,7 +49,70 @@ class DB_Functions {
         } else {
             return false;
         }
-    } 
+    }
+	
+	public function changePasswordFunction($email, $password){
+		$hash = $this->hashSSHA($password);
+        $encrypted_password = $hash["encrypted"]; // encrypted password
+        $salt = $hash["salt"]; // salt
+		
+		$stmt = $this->conn->prepare("UPDATE users SET encrypted_password=?,salt=? WHERE email=?");
+        $stmt->bind_param("sss", $encrypted_password, $salt, $email);
+		
+        if ($stmt->execute()) { 
+			$stmt->close(); 
+			return true; 
+		}
+		else {
+			$stmt->close(); 
+			return false; 
+			}
+	}
+	
+	public function changeNameFunction($email, $name){
+		
+		$stmt = $this->conn->prepare("UPDATE users SET name=? WHERE email=?");
+        $stmt->bind_param("ss", $name, $email);
+		
+        if ($stmt->execute()) { 
+			$stmt->close(); 
+			return true; 
+		}
+		else {
+			$stmt->close(); 
+			return false; 
+			}
+	}
+	public function deleteUserFunction($email){
+		
+		$stmt = $this->conn->prepare("DELETE FROM users WHERE email=?");
+        $stmt->bind_param("s", $email);
+		
+        if ($stmt->execute()) { 
+			$stmt->close(); 
+			return true; 
+		}
+		else {
+			$stmt->close(); 
+			return false; 
+			}
+	}
+	
+	public function resetDataFunction($email){
+		
+		$stmt = $this->conn->prepare("UPDATE users SET points=0, steps=0, game=0, poziom =1 WHERE email=?");
+        $stmt->bind_param("s", $email);
+		
+        if ($stmt->execute()) { 
+			$stmt->close(); 
+			return true; 
+		}
+		else {
+			$stmt->close(); 
+			return false; 
+			}
+	}
+	
 	//funkcja do aktualizowania kroków użytkownika
 	public function updateUserSteps($email, $steps, $updated_at,$points,$game,$poziom) {
 		$stmt = $this->conn->prepare("UPDATE users SET steps=?,updated_at=?,points =?,game =?,poziom =? WHERE email=?");

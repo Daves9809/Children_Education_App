@@ -160,8 +160,7 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
             mSensorManager.unregisterListener(this);
         }
         else if (getPreferencesInt(today()) < Integer.parseInt(poziom) * 10) {
-            Log.d("smieszny update", "oj tak");
-            db.updateUser(uid, "0", 0, 4, 1, today());
+            db.updateUser("0", 0, 4, 1, today());
         }
         savePreferences("name", name); // przy usunięciu aktywności zabezpieczenie przed przelogowaniem
         mSensorManager.unregisterListener(this); // wyłączanie sensora
@@ -204,33 +203,46 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
 
 
         if (todaySteps == 0) {
-            if (!zeroSteps) {
-                savePreferencesInt(today(), 0); // zapisywanie danych jako klucz-wartość z tego dnia
-                zeroSteps = true;
-            } else
-                savePreferencesInt(today(), 1);
+            firstRun();
         } else if (todaySteps >= Integer.parseInt(level) * 10) {
-            savePreferencesInt(today(), Integer.parseInt(level) * 10);
-            if (points >= Integer.parseInt(level) * 10) {
-                points = points - Integer.parseInt(level) * 10;
-                updateData(String.valueOf(Integer.parseInt(level) * 10), Integer.parseInt(level)+1, uid, points);
-                session.setLevelUp(true); // ustawiamy flage poniewaz level sie zwieksyl
-            }
-            else{
-                updateData(String.valueOf(Integer.parseInt(level) * 10), Integer.parseInt(level), uid, points);
-            }
-            Intent intent = new Intent(StepCounterActivity.this, MainActivity.class);
-            intent.putExtra("game", 4);
-            startActivity(intent);
-            finish();
+            updateDatabases(level, points);
             return;
         } else {
             additionStep = totalStepsCountSinceReboot - milestoneStep;
             savePreferencesInt(today(), todaySteps + additionStep);
         }
+        setDataOnDisplay();
+        updateProgressBar(progressBar, level, getPreferencesInt(today()));
+    }
+
+    private void setDataOnDisplay() {
         tvDistance.setText(String.valueOf(countDistance(todaySteps)));
-        updateProgressBar(progressBar, level, getPreferencesInt(today())); // update'owanie pasku progresu
-        tvStepCounter.setText(String.valueOf(getPreferencesInt(today()))); // wyświetlenie wyniku na ekranie
+        tvStepCounter.setText(String.valueOf(getPreferencesInt(today())));
+    }
+
+    private void updateDatabases(String level, int points) {
+        savePreferencesInt(today(), Integer.parseInt(level) * 10);
+        if (points >= Integer.parseInt(level) * 10) {
+            points = points - Integer.parseInt(level) * 10;
+            updateData(String.valueOf(Integer.parseInt(level) * 10), Integer.parseInt(level)+1, uid, points);
+            session.setLevelUp(true); // ustawiamy flage poniewaz level sie zwieksyl
+        }
+        else{
+            updateData(String.valueOf(Integer.parseInt(level) * 10), Integer.parseInt(level), uid, points);
+        }
+        Intent intent = new Intent(StepCounterActivity.this, MainActivity.class);
+        intent.putExtra("game", 4);
+        startActivity(intent);
+        finish();
+        return;
+    }
+
+    private void firstRun() {
+        if (!zeroSteps) {
+            savePreferencesInt(today(), 0); // zapisywanie danych jako klucz-wartość z tego dnia
+            zeroSteps = true;
+        } else
+            savePreferencesInt(today(), 1);
     }
 
 
@@ -265,9 +277,6 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
     private void updateData(final String steps, final int level, final String id, final int points) { // ta funkcja do poprawy
         // Tag używany do anulowania żądania
         String tag_string_req = "req_update";
-//        Log.d("UPDATE steps = ",steps);
-//        Log.d("UPDATE level = ",String.valueOf(level));
-//        Log.d("UPDATE points = ",String.valueOf(points));
 
         StringRequest strReq = new StringRequest(Request.Method.POST, // zapytanie do bazy danych pod adresem AppConfig.URL_LOGIN
                 AppConfig.URL_SEND_DATA, new Response.Listener<String>() { // stworzenie obiektu sluchacza odpowiedzi
@@ -276,7 +285,7 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
             @Override
             public void onResponse(String response) {
 
-                    db.updateUser(id, steps, points, 4, level, today());
+                    db.updateUser(steps, points, 4, level, today());
 
                 Log.d(TAG, "Update Response: " + response + " Steps = " + steps + " Points= " + points + " Game= " + 4 + " Poziom= " + level + " today()= " + today());
 
@@ -312,82 +321,6 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
         AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
     }
 
-    private void getDataFromMySql(final String email, final String id, final String basicPoziom) {
-        String tag_string_req = "req_getSteps";
-
-        pDialog.setMessage("Getting data ..");
-
-        StringRequest strReq = new StringRequest(Request.Method.POST, // zapytanie do bazy danych pod adresem AppConfig.URL_LOGIN
-                AppConfig.URL_GET_STEPS, new Response.Listener<String>() { // stworzenie obiektu sluchacza odpowiedzi
-
-
-            // funkcja odbierająca odpowiedz
-            @Override
-            public void onResponse(String response) {
-                Log.d(TAG, "GetSteps Response: " + response); // Dane dotyczące aktualizowania w Logcat'ie
-                try {
-                    JSONObject jObj = new JSONObject(response);
-                    boolean error = jObj.getBoolean("error");
-
-
-                    JSONObject user = jObj.getJSONObject("user");
-                    String steps = user.getString("steps");
-                    String updated_at = user.getString("updated_at");
-                    String points = user.getString("points");
-                    String game = user.getString("game");
-                    if (updated_at.equals(today())) {
-                        if (!steps.equals("null") && Integer.parseInt(steps) < (Integer.parseInt(poziom) * 10)) {
-                            db.updateUser(id, steps, Integer.parseInt(points), Integer.parseInt(game), Integer.parseInt(poziom), today());
-                            savePreferencesInt(today(), Integer.parseInt(steps));
-                            Log.w(TAG, "1");
-                        } else if (steps.equals("null")) { // kiedy konto jest nowe
-                            db.updateUser(id, "0", 0, 4, Integer.parseInt(basicPoziom), today());
-                            savePreferencesInt(today(), 0);
-                            Log.w(TAG, "2");
-                        } else {
-                            Log.w(TAG, "3");
-                            Intent intent = new Intent(StepCounterActivity.this, MainActivity.class);
-                            intent.putExtra("game", 4);
-                            startActivity(intent);
-                            finish();
-                        }
-                    } else {
-                        Log.w(TAG, "4");
-                        Log.w("updated_at= ", updated_at);
-                        Log.w("today()= ", today());
-                        savePreferencesInt(today(), 0);
-                    }
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
-            }
-        }, new Response.ErrorListener() { // utworzenie instancji obiektu Response.ErrorListener()
-
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.e(TAG, "GetSteps Error: " + error.getMessage());
-                Toast.makeText(getApplicationContext(),
-                        error.getMessage(), Toast.LENGTH_LONG).show();
-            }
-        }) {
-
-            @Override
-            protected Map<String, String> getParams() {
-                // Wysyłanie parametrów do adresu url logowania
-                Map<String, String> params = new HashMap<>();
-                params.put("email", email);
-
-                return params;
-            }
-
-        };
-
-        // Dodanie zapytania do kolejki zapytań
-        AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
-
-    }
 
     public String today() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -411,8 +344,7 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
     }
 
     private double countDistance(int steps) {
-        double doubleSteps = steps;
-        return (doubleSteps / 1250) * 1000;
+        return ((double) steps / 1250) * 1000;
     }
 
 }

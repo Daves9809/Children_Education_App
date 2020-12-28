@@ -15,4 +15,17 @@ public class AppConfig {
 
     // Adres Url pliku php do pobrania danych użytkowników z serwera
     public static String URL_GET_ALL_USERS = "http://dawid.server031806.nazwa.pl/getAllUsers.php";
+
+    // Adres Url pliku php do pobrania danych użytkowników z serwera
+    public static String URL_CHANGE_NAME = "http://dawid.server031806.nazwa.pl/changeName.php";
+
+    // Adres Url pliku php do pobrania danych użytkowników z serwera
+    public static String URL_CHANGE_PASSWORD = "http://dawid.server031806.nazwa.pl/changePassword.php";
+
+    // Adres Url pliku php do pobrania danych użytkowników z serwera
+    public static String URL_RESET_DATA = "http://dawid.server031806.nazwa.pl/resetData.php";
+
+
+    // Adres Url pliku php do pobrania danych użytkowników z serwera
+    public static String URL_DELETE_USER = "http://dawid.server031806.nazwa.pl/deleteUser.php";
 }

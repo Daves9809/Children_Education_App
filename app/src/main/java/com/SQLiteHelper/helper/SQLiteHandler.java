@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.nfc.tech.NfcA;
 import android.util.Log;
 
 import java.util.HashMap;
@@ -64,11 +65,17 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         onCreate(db);
     }
     // funkcja do update'owania danych w SQLite
-    public void updateUser(String id, String steps, int basicPoints, int game,int poziom, String updated_at){
+    public void updateUser(String steps, int basicPoints, int game,int poziom, String updated_at){
         SQLiteDatabase db = this.getWritableDatabase();
         db.execSQL("UPDATE " + TABLE_USER +" SET " + KEY_STEPS + " = " + steps + "," + KEY_POZIOM + " = " + poziom + "," + KEY_POINTS + " = " + basicPoints + ","   + KEY_GAME + " = " + game + ","   + KEY_UPDATED_AT + " = '" + updated_at  + "' WHERE " + KEY_ID + " = " + 1);
         Log.d(TAG,"Sqlite data updated");
     }
+    public void updateName(String name){
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.execSQL("UPDATE " + TABLE_USER +" SET " + KEY_NAME + " = '" + name +  "' WHERE " + KEY_ID + " = " + 1);
+        Log.d(TAG,"Sqlite data updated");
+    }
+
 
 
     /**

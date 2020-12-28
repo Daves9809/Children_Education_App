@@ -102,39 +102,47 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void transformData() {
-        char[] chars = new char[10];
-        for (int i = 0; i < 10; i++) {
-            chars[i] = data.charAt(i);
+        if(data != null) {
+            char[] chars = new char[10];
+            for (int i = 0; i < 10; i++) {
+                chars[i] = data.charAt(i);
+            }
+            data = String.valueOf(chars);
         }
-        data = String.valueOf(chars);
     }
 
     private void setDataOnDisplay() {
-        imieLayout.setText(imie);
-        poziomLayout.setText(poziom);
-        if (!punkty.equals("null"))
-            punktyLayout.setText(punkty);
-        else
-            punktyLayout.setText("0");
-        dataLayout.setText(data);
+        if(imie != null && poziom !=null && punkty !=null) {
+            imieLayout.setText(imie);
+            poziomLayout.setText(poziom);
+            if (!punkty.equals("null"))
+                punktyLayout.setText(punkty);
+            else
+                punktyLayout.setText("0");
+            dataLayout.setText(data);
+        }
     }
 
     private void getUserData() {
         HashMap<String, String> user = db.getUserDetails();
-        imie = user.get("name");
-        Log.d("mainact", imie);
-        poziom = user.get("poziom");
-        Log.d("mainact",poziom);
-        punkty = user.get("points");
-        Log.d("mainact",punkty);
-        data = user.get("created_at");
+        if (!user.isEmpty()) {
+            imie = user.get("name");
+            Log.d("mainact", imie);
+            poziom = user.get("poziom");
+            Log.d("mainact", poziom);
+            punkty = user.get("points");
+            Log.d("mainact", punkty);
+            data = user.get("created_at");
+        }
     }
 
     private void updateProgressBar(ProgressBar progressBar, String poziom, String points) {
-        if (!poziom.equals("null") && !points.equals("null")) {
-            progressBar.setProgress((int) ((Double.parseDouble(points) / (Double.parseDouble(poziom) * 10)) * 100));
-        } else {
-            progressBar.setProgress(0);
+        if(poziom !=null && points !=null) {
+            if (!poziom.equals("null") && !points.equals("null")) {
+                progressBar.setProgress((int) ((Double.parseDouble(points) / (Double.parseDouble(poziom) * 10)) * 100));
+            } else {
+                progressBar.setProgress(0);
+            }
         }
     }
 
@@ -176,34 +184,34 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(MainActivity.this, StepCounterActivity.class);
                 startActivity(intent);
                 finish();
-                Log.d(TAG,"ALALA 1");
+                Log.d(TAG, "ALALA 1");
 
             } else {
                 Intent intent = new Intent(MainActivity.this, QuestionActivity.class);
                 intent.putExtra("poziom", poziom);
                 startActivity(intent);
                 finish();
-                Log.d(TAG,"ALALA 2");
+                Log.d(TAG, "ALALA 2");
             }
 
 
         } else if (updated_at.equals(today())) { // jeśli dzień się nie zmienił kontynuujemy rozpoczęty proces
 
             game = user.get("game");
-            Log.d("game = ",game);
-            Log.d("stepsM = ",steps);
+            Log.d("game = ", game);
+            Log.d("stepsM = ", steps);
 
             if (game.equals("null")) {
                 Intent intent = new Intent(MainActivity.this, QuestionActivity.class);
                 intent.putExtra("poziom", poziom);
                 startActivity(intent);
                 finish();
-                Log.d(TAG,"ALALA 3");
-            } else if (Integer.parseInt(game) == 4 && Integer.parseInt(steps) < (Integer.parseInt(poziom)*10) && !session.isLevelUp()) {
+                Log.d(TAG, "ALALA 3");
+            } else if (Integer.parseInt(game) == 4 && Integer.parseInt(steps) < (Integer.parseInt(poziom) * 10) && !session.isLevelUp()) {
                 Intent intent = new Intent(MainActivity.this, StepCounterActivity.class);
                 startActivity(intent);
                 finish();
-                Log.d(TAG,"ALALA 4");
+                Log.d(TAG, "ALALA 4");
             } else {
                 Toast.makeText(getApplicationContext(), "Wykonałeś wszystkie zadania, wróc ponownie jutro!", Toast.LENGTH_LONG).show();
             }
