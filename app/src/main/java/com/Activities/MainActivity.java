@@ -18,7 +18,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ChildrenEducationApp.R;
-import com.SQLiteHelper.app.AppController;
 
 import com.SQLiteHelper.helper.SQLiteHandler;
 import com.SQLiteHelper.helper.SessionManager;
