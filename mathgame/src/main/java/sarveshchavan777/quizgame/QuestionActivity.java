@@ -16,13 +16,13 @@ import android.widget.Button;
 import android.widget.TextView;
 
 
-
 public class QuestionActivity extends Activity {
     List<Question> quesList;
     int score = 0;
     int qid = 0;
-    Boolean isEnd= false;
+    Boolean isEnd = false;
     String poziom;
+    boolean timeIsUp = false;
 
 
     Question currentQ;
@@ -45,17 +45,17 @@ public class QuestionActivity extends Activity {
             poziom = extras.getString("poziom");
         }
 
-        db = new QuizHelper(this,poziom);
+        db = new QuizHelper(this, poziom);
         quesList = db.getAllQuestions();
-        if(quesList.isEmpty())
-            Log.d("QuestionActivity  ","quesList is empty");
+        if (quesList.isEmpty())
+            Log.d("QuestionActivity  ", "quesList is empty");
         currentQ = quesList.get(qid);
 
 
         scored = (TextView) findViewById(R.id.score);
 
 
-        times = (TextView) findViewById(R.id.timers);
+        times = (TextView) findViewById(R.id.times);
 
 
         setQuestionView();
@@ -64,9 +64,6 @@ public class QuestionActivity extends Activity {
 
         CounterClass timer = new CounterClass(60000, 1000);
         timer.start();
-
-
-
 
 
         button1.setOnClickListener(new View.OnClickListener() {
@@ -98,35 +95,36 @@ public class QuestionActivity extends Activity {
 
 
             score++;
-            scored.setText("Score : " + score);
+            scored.setText("Punkty : " + score);
         } else {
-            Log.d("ELSE","1");
+            Log.d("ELSE", "1");
 
 
             Intent intent = new Intent(QuestionActivity.this,
                     ResultActivity.class);
 
+            timeIsUp = true;
             isEnd = true;
             Bundle b = new Bundle();
             b.putInt("score", score);
-            b.putString("poziom",poziom);
+            b.putString("poziom", poziom);
+            b.putString("message", "Zła odpowiedź");
             intent.putExtras(b);
             startActivity(intent);
             finish();
             db.deleteDatabase();
         }
-        if (qid <= 4 ) {
-
+        if (qid <= 4) {
 
             currentQ = quesList.get(qid);
             setQuestionView();
-        } else if(!isEnd){
-            Log.d("ELSE","2");
-
-            Intent intent = new Intent(QuestionActivity.this,won.class);
+        } else if (!isEnd) {
+            Log.d("ELSE", "2");
+            timeIsUp = true;
+            Intent intent = new Intent(QuestionActivity.this, won.class);
             Bundle b = new Bundle();
-            b.putInt("score",score);
-            b.putString("poziom",poziom);
+            b.putInt("score", score);
+            b.putString("poziom", poziom);
             intent.putExtras(b);
             startActivity(intent);
             finish();
@@ -149,13 +147,24 @@ public class QuestionActivity extends Activity {
 
         @Override
         public void onFinish() {
-            times.setText("Time is up");
-
+            if (!timeIsUp) {
+                times.setText("Czas się skończył");
+                Intent intent = new Intent(QuestionActivity.this,
+                        ResultActivity.class);
+                isEnd = true;
+                Bundle b = new Bundle();
+                b.putInt("score", score);
+                b.putString("poziom", poziom);
+                b.putString("message", "Czas się skończył");
+                intent.putExtras(b);
+                startActivity(intent);
+                finish();
+                db.deleteDatabase();
+            }
         }
 
-      @Override
+        @Override
         public void onTick(long millisUntilFinished) {
-            // TODO Auto-generated method stub
 
             long millis = millisUntilFinished;
             String hms = String.format(
@@ -168,6 +177,8 @@ public class QuestionActivity extends Activity {
                             - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS
                             .toMinutes(millis)));
             times.setText(hms);
+            if (!timeIsUp)
+                Log.d("czas", hms);
         }
 
 
@@ -183,6 +194,10 @@ public class QuestionActivity extends Activity {
         qid++;
     }
 
-
+    @Override
+    protected void onDestroy() {
+        timeIsUp = true;
+        super.onDestroy();
+    }
 }
 

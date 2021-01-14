@@ -63,10 +63,11 @@ public class StatisticisActivity extends AppCompatActivity {
                     for(int i =0;i<array.length();i++){
                         JSONObject object = array.getJSONObject(i);
                         String name = object.getString("name");
-                        int poziom = object.getInt("poziom");
-                        int points = object.getInt("points");
+                        Integer poziom = object.getInt("poziom");
+                        Integer points = object.getInt("points");
 
-                        User user = new User(name,poziom,points);
+
+                        User user = new User(name, poziom, points);
 
                         users.add(user);
                         Collections.sort(users);

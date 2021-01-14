@@ -59,8 +59,6 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
     private String uid;
     private String poziom;
     private String basicPoints;
-    private int levelToSend;
-    private int pointsToSend = 0;
     private boolean zeroSteps;
     private int todaySteps;
     private int bPoints;
@@ -112,15 +110,11 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
             }
 
         } else if (getPreferencesString("name").equals(name)) { // nie nastąpiło przelogowanie, ale nastapilo wyjscie z aplikacji lub
-            Log.d("test", "2");
-            Toast.makeText(getApplicationContext(), "nie nastąpiło przelogowanie", Toast.LENGTH_SHORT).show();
             if (getPreferencesInt("pointss") == 0) { // czyli nie nastąpiło kasowanie na skutek przelogowania lub wypełnienia zadania
                 savePreferencesInt("pointss", bPoints + appScore);
                 savePreferences("poziom", poziom);
             }
         } else if (!getPreferencesString("name").equals(name)) { // nastąpiło przelogowanie
-            Log.d("test", "3");
-            Toast.makeText(getApplicationContext(), "nastąpiło przelogowanie", Toast.LENGTH_SHORT).show();
             editor.clear().commit(); // czyszczenie podręcznych danych
             savePreferences("name",name);
             savePreferencesInt("pointss", appScore);
@@ -160,7 +154,7 @@ public class StepCounterActivity extends AppCompatActivity implements SensorEven
             mSensorManager.unregisterListener(this);
         }
         else if (getPreferencesInt(today()) < Integer.parseInt(poziom) * 10) {
-            db.updateUser("0", 0, 4, 1, today());
+            db.updateUser(String.valueOf(getPreferencesInt(today())), getPreferencesInt("pointss"), 4, Integer.parseInt(getPreferencesString("poziom")), today());
         }
         savePreferences("name", name); // przy usunięciu aktywności zabezpieczenie przed przelogowaniem
         mSensorManager.unregisterListener(this); // wyłączanie sensora

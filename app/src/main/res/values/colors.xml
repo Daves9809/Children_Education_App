@@ -20,4 +20,7 @@
     <color name="btn_statistics">#2781C8</color>
     <color name="light_green">#78E47D</color>
     <color name="light_red">#F18989</color>
+    <color name="top_stroke_color">#0000FF</color>
+    <color name="bottom_stroke_color">#FF0000</color>
+    <color name="main">#00FF00</color>
 </resources>

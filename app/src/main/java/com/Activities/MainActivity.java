@@ -43,18 +43,16 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Context context = AppController.getInstance();
 
         //przypisanie zmiennym odpowiednich elementów w przestrzeni activity_main.xml
-        TextView txtName = (TextView) findViewById(R.id.name);
-        imieLayout = (TextView) findViewById(R.id.imieLayout);
-        poziomLayout = (TextView) findViewById(R.id.poziomLayout);
-        punktyLayout = (TextView) findViewById(R.id.punktyLayout);
-        dataLayout = (TextView) findViewById(R.id.dataLayout);
-        Button btnLogout = (Button) findViewById(R.id.btnLogout);
-        Button btnStatistics = (Button) findViewById(R.id.btnInfo);
+        imieLayout = findViewById(R.id.imieLayout);
+        poziomLayout = findViewById(R.id.poziomLayout);
+        punktyLayout = findViewById(R.id.punktyLayout);
+        dataLayout = findViewById(R.id.dataLayout);
+        Button btnLogout = findViewById(R.id.btnLogout);
+        Button btnStatistics = findViewById(R.id.btnInfo);
         Button btnEdit = findViewById(R.id.btnEdit);
-        ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
+        ProgressBar progressBar = findViewById(R.id.progress_bar);
         // Definiowanie lokalnego programu obsługi bazy danych
         db = new SQLiteHandler(getApplicationContext(), "android_user");
 
@@ -68,7 +66,6 @@ public class MainActivity extends AppCompatActivity {
         getUserData();
         transformData();
         setDataOnDisplay();
-
         updateProgressBar(progressBar, poziom, punkty);
 
         // przycisk do wylogowania
@@ -127,11 +124,8 @@ public class MainActivity extends AppCompatActivity {
         HashMap<String, String> user = db.getUserDetails();
         if (!user.isEmpty()) {
             imie = user.get("name");
-            Log.d("mainact", imie);
             poziom = user.get("poziom");
-            Log.d("mainact", poziom);
             punkty = user.get("points");
-            Log.d("mainact", punkty);
             data = user.get("created_at");
         }
     }
@@ -178,40 +172,33 @@ public class MainActivity extends AppCompatActivity {
 
             session.setLevelUp(false); // jesli zmienia sie dzien zmieniamy flage
             game = "0";
-            steps = "0"; // ??
 
             if (Integer.parseInt(game) >= 3) {
                 Intent intent = new Intent(MainActivity.this, StepCounterActivity.class);
                 startActivity(intent);
                 finish();
-                Log.d(TAG, "ALALA 1");
 
             } else {
                 Intent intent = new Intent(MainActivity.this, QuestionActivity.class);
                 intent.putExtra("poziom", poziom);
                 startActivity(intent);
                 finish();
-                Log.d(TAG, "ALALA 2");
             }
 
 
         } else if (updated_at.equals(today())) { // jeśli dzień się nie zmienił kontynuujemy rozpoczęty proces
 
             game = user.get("game");
-            Log.d("game = ", game);
-            Log.d("stepsM = ", steps);
 
             if (game.equals("null")) {
                 Intent intent = new Intent(MainActivity.this, QuestionActivity.class);
                 intent.putExtra("poziom", poziom);
                 startActivity(intent);
                 finish();
-                Log.d(TAG, "ALALA 3");
             } else if (Integer.parseInt(game) == 4 && Integer.parseInt(steps) < (Integer.parseInt(poziom) * 10) && !session.isLevelUp()) {
                 Intent intent = new Intent(MainActivity.this, StepCounterActivity.class);
                 startActivity(intent);
                 finish();
-                Log.d(TAG, "ALALA 4");
             } else {
                 Toast.makeText(getApplicationContext(), "Wykonałeś wszystkie zadania, wróc ponownie jutro!", Toast.LENGTH_LONG).show();
             }

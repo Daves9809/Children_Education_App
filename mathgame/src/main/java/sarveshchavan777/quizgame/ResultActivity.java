@@ -11,7 +11,8 @@ import android.widget.TextView;
 public class ResultActivity extends Activity {
 
     int score;
-    String poziom;
+    String poziom, message;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -24,8 +25,9 @@ public class ResultActivity extends Activity {
 
         score = b.getInt("score");
         poziom = b.getString("poziom");
+        message = b.getString("message");
 
-        textResult.setText("Zła odpowiedź!! Zebrane punkty " + " = " + score);
+        textResult.setText(message + "! Zebrane punkty " + " = " + score);
 
     }
 
